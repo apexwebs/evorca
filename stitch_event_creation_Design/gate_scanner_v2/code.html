@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-primary": "#82d3de",
+              "secondary-fixed": "#ffe088",
+              "surface-variant": "#e2e2e5",
+              "on-surface": "#1a1c1e",
+              "on-surface-variant": "#3e494a",
+              "on-background": "#1a1c1e",
+              "background": "#f9f9fc",
+              "outline-variant": "#bec8ca",
+              "tertiary-fixed": "#b1edf5",
+              "on-primary-fixed-variant": "#004f56",
+              "primary": "#00535b",
+              "surface-bright": "#f9f9fc",
+              "primary-fixed": "#9ff0fb",
+              "inverse-surface": "#2f3133",
+              "on-secondary-container": "#745c00",
+              "on-error-container": "#93000a",
+              "inverse-on-surface": "#f0f0f3",
+              "error": "#ba1a1a",
+              "tertiary-fixed-dim": "#96d0d8",
+              "on-tertiary": "#ffffff",
+              "surface-container-low": "#f3f3f6",
+              "surface-dim": "#dadadc",
+              "on-primary-container": "#9becf7",
+              "secondary-fixed-dim": "#e9c349",
+              "primary-container": "#006d77",
+              "on-secondary": "#ffffff",
+              "on-tertiary-fixed-variant": "#074f56",
+              "surface-container-high": "#e8e8ea",
+              "error-container": "#ffdad6",
+              "tertiary": "#0f535a",
+              "on-tertiary-container": "#aee9f1",
+              "on-primary": "#ffffff",
+              "surface": "#f9f9fc",
+              "outline": "#6f797a",
+              "on-primary-fixed": "#001f23",
+              "tertiary-container": "#2f6b72",
+              "surface-container-highest": "#e2e2e5",
+              "on-error": "#ffffff",
+              "primary-fixed-dim": "#82d3de",
+              "surface-tint": "#006972",
+              "on-secondary-fixed-variant": "#574500",
+              "secondary-container": "#fed65b",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#eeeef0",
+              "on-secondary-fixed": "#241a00",
+              "secondary": "#735c00",
+              "on-tertiary-fixed": "#001f23",
+              "evorca-teal": "#004d4d",
+              "evorca-gold": "#d4af37",
+              "evorca-light-teal": "#006666"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.875rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .scanner-gradient {
+        background: radial-gradient(circle, transparent 65%, rgba(0, 102, 102, 0.4) 100%);
+      }
+      .scan-line {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        box-shadow: 0 0 15px #d4af37;
+        position: absolute;
+        width: 100%;
+        top: 50%;
+        animation: scan 3s infinite linear;
+      }
+      @keyframes scan {
+        0% { top: 0%; }
+        50% { top: 100%; }
+        100% { top: 0%; }
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 font-body text-on-surface overflow-hidden h-screen w-full flex flex-col">
+<!-- TopAppBar Small Implementation from COMPONENTS_16 -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm border-b border-slate-100/50 dark:border-slate-800/50">
+<div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center overflow-hidden active:scale-95 duration-200 cursor-pointer">
+<span class="material-symbols-outlined text-teal-800 dark:text-teal-200 text-lg" data-icon="person">person</span>
+</div>
+<h1 class="font-['Manrope'] tracking-tight font-bold text-lg text-teal-900 dark:text-teal-100">Gate Scanner</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-teal-900 dark:text-teal-100 active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="flashlight_on">flashlight_on</span>
+</button>
+<button class="text-teal-900 dark:text-teal-100 active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Scanner Canvas -->
+<main class="flex-1 relative flex flex-col items-center justify-center pt-16">
+<!-- Live Camera View Simulation -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-slate-900 overflow-hidden relative">
+<img class="w-full h-full object-cover opacity-30 grayscale blur-[2px]" data-alt="atmospheric background of an elite event venue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2xzPz7ir8R4eWI0w5sqKfGgesw6Sqt56g-gx6lYy54bwDifdezmnLZ3tsLyx9h__NnIDK7uO9wGZVeFZeAH813HcvEWPJOSQoqWJnfQOZ2jsbi0mpogTNsWiuNusRqrApMsy5QINGFu6auvVR2MMuN14xIKFo0H3JKllIPw_6rfU-q7T6B5a5Cnj5MqrLvhBNxjFuYJMkeCGGt0U3d6dZPIduBrGWWJvIVbRjbxRaSvRo7PTR8WJNn8VOoOZf2-TpBIWgqH7BAWw"/>
+</div>
+</div>
+<!-- Scanner Window Overlay -->
+<div class="relative z-10 w-72 h-72 md:w-80 md:h-80 flex items-center justify-center">
+<!-- Corners - Gold Branding -->
+<div class="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-evorca-gold rounded-tl-3xl shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
+<div class="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-evorca-gold rounded-tr-3xl shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
+<div class="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-evorca-gold rounded-bl-3xl shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
+<div class="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-evorca-gold rounded-br-3xl shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
+<!-- Scanning Animation Simulation -->
+<div class="w-full h-full scanner-gradient rounded-3xl relative overflow-hidden flex items-center justify-center">
+<div class="scan-line opacity-80"></div>
+<div class="w-48 h-48 opacity-10">
+<span class="material-symbols-outlined text-evorca-gold text-[120px]" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+</div>
+</div>
+<!-- Stats Bar -->
+<div class="mt-8 z-10">
+<div class="bg-slate-900/60 backdrop-blur-md px-6 py-2.5 rounded-full border border-teal-500/20 flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-evorca-gold shadow-[0_0_10px_#d4af37]"></div>
+<span class="font-headline font-bold text-teal-50 tracking-[0.2em] text-[10px] uppercase">124 / 200 Checked In</span>
+</div>
+</div>
+</main>
+<!-- Floating Result Card (Success State) - Prestige Palette -->
+<div class="fixed bottom-0 left-0 w-full px-4 pb-10 z-50">
+<div class="bg-slate-900/95 backdrop-blur-2xl rounded-[2.5rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-teal-500/10 flex flex-col gap-6">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-5">
+<div class="relative">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-evorca-gold p-0.5">
+<img class="w-full h-full object-cover rounded-[0.875rem]" data-alt="portrait of guest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKl5OxcpwpsmGX9Uv1s1d11bUsLIirzL8AmAFv2HjVYpvFwic-VZ3K7lV1-FW5QpUIIKkYFyuqbia281mznaPYma6Zjyzlh4O4CdCbmf86MybYnJjsFjxIUGnkr7k6vbRI1RVYDHseHuFlEaO2mVbt1mI9zYCOoK_HuQdVlRLwSgKmvUG1eZhydnMmgYP4-nJo8I4EJ29rrGQMAZoLXYViGrPVeKqjxaKYhcSssSg_rIbYLo0kPngeNoBw6tq9DprAUlSCkEp70p0"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-teal-500 w-6 h-6 rounded-full border-4 border-slate-900 flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white font-black" data-icon="check">check</span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-0.5">
+<h2 class="font-headline font-extrabold text-xl text-white tracking-tight">Amara Njeri</h2>
+<span class="bg-evorca-gold text-slate-950 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">VIP</span>
+</div>
+<div class="flex items-center gap-1.5 text-teal-400">
+<span class="font-headline font-bold text-xs uppercase tracking-widest opacity-90">Valid Prestige Pass</span>
+</div>
+</div>
+</div>
+<button class="bg-slate-800/80 w-11 h-11 rounded-2xl text-slate-400 active:scale-90 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="info">info</span>
+</button>
+</div>
+<!-- Detailed Notes Card - Premium System Integration -->
+<div class="bg-teal-950/30 rounded-2xl p-4 border border-teal-500/10 flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-evorca-gold/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-evorca-gold" data-icon="priority_high" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+<div>
+<p class="text-[10px] font-black text-teal-500/70 uppercase tracking-[0.15em]">Guest Provisions</p>
+<p class="text-sm font-semibold text-slate-200">Strictly Nut-Free Catering Required</p>
+</div>
+</div>
+<!-- Action Area -->
+<div class="flex gap-4">
+<button class="flex-1 bg-teal-700 hover:bg-teal-600 text-white font-headline font-extrabold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-teal-900/40 uppercase tracking-widest text-sm">
+                ADMIT GUEST
+            </button>
+<button class="w-16 bg-slate-800 text-slate-300 rounded-2xl flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>
