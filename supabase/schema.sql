@@ -61,13 +61,46 @@ ALTER TABLE public.organisations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.guests ENABLE ROW LEVEL SECURITY;
 
--- POLICIES (BASIC)
+-- POLICIES (COMPLETE CRUD)
+-- Profiles
 CREATE POLICY "Users can view their own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Organisers can view their own events" ON public.events FOR ALL USING (
-  created_by = auth.uid() OR 
+CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Organisations
+CREATE POLICY "Users can view organisations they own" ON public.organisations FOR SELECT USING (owner_id = auth.uid());
+CREATE POLICY "Users can create organisations" ON public.organisations FOR INSERT WITH CHECK (owner_id = auth.uid());
+CREATE POLICY "Users can update organisations they own" ON public.organisations FOR UPDATE USING (owner_id = auth.uid());
+
+-- Events
+CREATE POLICY "Organisers can view their own events" ON public.events FOR SELECT USING (
+  created_by = auth.uid() OR
   org_id IN (SELECT id FROM public.organisations WHERE owner_id = auth.uid())
 );
-CREATE POLICY "Organisers can view their own guests" ON public.guests FOR ALL USING (
+CREATE POLICY "Organisers can create events" ON public.events FOR INSERT WITH CHECK (
+  created_by = auth.uid() OR
+  org_id IN (SELECT id FROM public.organisations WHERE owner_id = auth.uid())
+);
+CREATE POLICY "Organisers can update their own events" ON public.events FOR UPDATE USING (
+  created_by = auth.uid() OR
+  org_id IN (SELECT id FROM public.organisations WHERE owner_id = auth.uid())
+);
+CREATE POLICY "Organisers can delete their own events" ON public.events FOR DELETE USING (
+  created_by = auth.uid() OR
+  org_id IN (SELECT id FROM public.organisations WHERE owner_id = auth.uid())
+);
+
+-- Guests
+CREATE POLICY "Organisers can view their own guests" ON public.guests FOR SELECT USING (
+  event_id IN (SELECT id FROM public.events WHERE created_by = auth.uid())
+);
+CREATE POLICY "Organisers can create guests" ON public.guests FOR INSERT WITH CHECK (
+  event_id IN (SELECT id FROM public.events WHERE created_by = auth.uid())
+);
+CREATE POLICY "Organisers can update their own guests" ON public.guests FOR UPDATE USING (
+  event_id IN (SELECT id FROM public.events WHERE created_by = auth.uid())
+);
+CREATE POLICY "Organisers can delete their own guests" ON public.guests FOR DELETE USING (
   event_id IN (SELECT id FROM public.events WHERE created_by = auth.uid())
 );
 

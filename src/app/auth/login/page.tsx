@@ -2,8 +2,45 @@
 
 import { Mail, ArrowRight, UserPlus, Lock } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed')
+        return
+      }
+
+      // Login successful - redirect to dashboard
+      router.push('/dashboard')
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <div className="space-y-12">
       {/* Header Section (Editorial Authority) */}
@@ -34,8 +71,15 @@ export default function LoginPage() {
         <div className="h-[1px] flex-1 bg-outline-variant/20"></div>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="p-4 bg-error-container border border-error/20 rounded-xl">
+          <p className="text-error text-sm font-medium">{error}</p>
+        </div>
+      )}
+
       {/* Email Login Form (Minimalist Undersline) */}
-      <form className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex flex-col group">
           <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1 group-focus-within:text-secondary-fixed transition-colors">
             Email Identity
@@ -43,8 +87,12 @@ export default function LoginPage() {
           <div className="flex items-center gap-3 border-b-2 border-outline-variant/15 group-focus-within:border-primary transition-all pb-2">
             <Mail className="w-5 h-5 text-on-surface-variant/40" />
             <input 
+              id="email"
               type="email" 
-              placeholder="e.g. curator@apexwebs.com" 
+              placeholder="e.g. curator@apexwebs.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               className="flex-1 bg-transparent border-0 focus:ring-0 p-0 text-lg font-medium placeholder:text-on-surface-variant/30"
             />
           </div>
@@ -62,15 +110,19 @@ export default function LoginPage() {
           <div className="flex items-center gap-3 border-b-2 border-outline-variant/15 group-focus-within:border-primary transition-all pb-2">
             <Lock className="w-5 h-5 text-on-surface-variant/40" />
             <input 
+              id="password"
               type="password" 
-              placeholder="••••••••" 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               className="flex-1 bg-transparent border-0 focus:ring-0 p-0 text-lg font-medium placeholder:text-on-surface-variant/30"
             />
           </div>
         </div>
 
-        <button className="w-full btn-prestige-primary flex items-center justify-center gap-3 py-4 shadow-xl shadow-primary/20">
-          Enter The Prestige <ArrowRight className="w-5 h-5" />
+        <button type="submit" disabled={isLoading} className="w-full btn-prestige-primary flex items-center justify-center gap-3 py-4 shadow-xl shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed">
+          {isLoading ? 'Entering...' : 'Enter The Prestige'} <ArrowRight className="w-5 h-5" />
         </button>
       </form>
 

@@ -2,11 +2,50 @@
 
 import { Calendar, Users, QrCode, TrendingUp, Sparkles, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+
+interface Event {
+  id: string
+  title: string
+  date_start: string
+  status: string
+  max_guests: number | null
+}
 
 export default function Dashboard() {
+  const [events, setEvents] = useState<Event[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/events')
+        const data = await response.json()
+
+        if (!response.ok) {
+          setError(data.error || 'Failed to fetch events')
+          return
+        }
+
+        setEvents(data.events || [])
+      } catch (err) {
+        setError('Network error. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchEvents()
+  }, [])
+
+  // Calculate stats from real data
+  const activeEvents = events.filter(event => event.status === 'published').length
+  const totalGuests = events.reduce((sum, event) => sum + (event.max_guests || 0), 0)
+
   const stats = [
-    { label: 'Active Events', value: '0', icon: Calendar, color: 'text-primary' },
-    { label: 'Total Guests', value: '0', icon: Users, color: 'text-secondary' },
+    { label: 'Active Events', value: activeEvents.toString(), icon: Calendar, color: 'text-primary' },
+    { label: 'Total Guests', value: totalGuests.toString(), icon: Users, color: 'text-secondary' },
     { label: 'Check-ins', value: '0', icon: QrCode, color: 'text-primary' },
     { label: 'Conversion', value: '0%', icon: TrendingUp, color: 'text-secondary' },
   ]
@@ -69,20 +108,62 @@ export default function Dashboard() {
           <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Sorting by Date (Asc)</span>
         </div>
 
-        {/* Empty State */}
-        <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low/50 rounded-2xl border-2 border-dashed border-outline-variant/20">
-          <div className="bg-white p-6 rounded-full shadow-sm mb-6">
-            <Calendar className="w-12 h-12 text-outline-variant" />
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <div className="text-on-surface-variant">Loading events...</div>
           </div>
-          <p className="font-headline text-lg text-primary font-bold mb-2">No Active Curations</p>
-          <p className="text-on-surface-variant text-sm mb-8 text-center max-w-xs">
-            Begin your next masterpiece by creating a new prestige event experience.
-          </p>
-          <Link href="/dashboard/events/create" className="btn-prestige-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            <span>Curate New Event</span>
-          </Link>
-        </div>
+        ) : error ? (
+          <div className="flex justify-center py-20">
+            <div className="text-error text-sm">{error}</div>
+          </div>
+        ) : events.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low/50 rounded-2xl border-2 border-dashed border-outline-variant/20">
+            <div className="bg-white p-6 rounded-full shadow-sm mb-6">
+              <Calendar className="w-12 h-12 text-outline-variant" />
+            </div>
+            <p className="font-headline text-lg text-primary font-bold mb-2">No Active Curations</p>
+            <p className="text-on-surface-variant text-sm mb-8 text-center max-w-xs">
+              Begin your next masterpiece by creating a new prestige event experience.
+            </p>
+            <Link href="/dashboard/events/create" className="btn-prestige-primary flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              <span>Curate New Event</span>
+            </Link>
+          </div>
+        ) : (
+          /* Events List */
+          <div className="space-y-4">
+            {events.map((event) => (
+              <div key={event.id} className="prestige-card p-6 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h4 className="font-headline font-bold text-lg text-primary mb-2">{event.title}</h4>
+                    <div className="flex items-center gap-4 text-sm text-on-surface-variant">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(event.date_start).toLocaleDateString()}</span>
+                      </div>
+                      {event.max_guests && (
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span>{event.max_guests} guests</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
+                    event.status === 'published'
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-outline-variant/10 text-on-surface-variant'
+                  }`}>
+                    {event.status}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   )

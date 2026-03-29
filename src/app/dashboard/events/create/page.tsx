@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Calendar, MapPin, Sparkles, ChevronRight, ChevronLeft, Check, Ticket, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const steps = [
   { id: 1, label: 'Details', icon: Sparkles },
@@ -13,6 +14,76 @@ const steps = [
 
 export default function CreateEvent() {
   const [currentStep, setCurrentStep] = useState(1)
+  const router = useRouter()
+
+  // Form state
+  const [formData, setFormData] = useState({
+    // Step 1: Basic Info
+    name: '',
+    type: 'Corporate Summit',
+    dressCode: '',
+    description: '',
+
+    // Step 2: Venue & Guest
+    venue: '',
+    address: '',
+    date: '',
+    time: '',
+    maxGuests: '',
+
+    // Step 3: Pricing
+    ticketPrice: '',
+    currency: 'USD',
+
+    // Step 4: Finalize
+    isPublic: false,
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const updateFormData = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.name,
+          description: formData.description,
+          date: formData.date,
+          time: formData.time,
+          venue: formData.venue,
+          address: formData.address,
+          maxGuests: formData.maxGuests,
+          dressCode: formData.dressCode,
+          type: formData.type
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to create event')
+        return
+      }
+
+      // Success - redirect to dashboard
+      router.push('/dashboard')
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-12">
@@ -56,14 +127,20 @@ export default function CreateEvent() {
                   <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Name</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. The Sapphire Corporate Gala" 
+                    placeholder="e.g. The Sapphire Corporate Gala"
+                    value={formData.name}
+                    onChange={(e) => updateFormData('name', e.target.value)}
                     className="input-prestige text-2xl font-medium" 
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-8">
                   <div className="flex flex-col">
                     <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Type</label>
-                    <select className="input-prestige cursor-pointer">
+                    <select
+                      value={formData.type}
+                      onChange={(e) => updateFormData('type', e.target.value)}
+                      className="input-prestige cursor-pointer"
+                    >
                       <option>Corporate Summit</option>
                       <option>Wedding Reception</option>
                       <option>Private Soirée</option>
@@ -71,21 +148,176 @@ export default function CreateEvent() {
                   </div>
                   <div className="flex flex-col">
                     <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Dress Code</label>
-                    <input type="text" placeholder="e.g. Black Tie" className="input-prestige" />
+                    <input
+                      type="text"
+                      placeholder="e.g. Black Tie"
+                      value={formData.dressCode}
+                      onChange={(e) => updateFormData('dressCode', e.target.value)}
+                      className="input-prestige"
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Description</label>
                   <textarea 
                     rows={4} 
-                    placeholder="The narrative of your event..." 
+                    placeholder="The narrative of your event..."
+                    value={formData.description}
+                    onChange={(e) => updateFormData('description', e.target.value)}
                     className="input-prestige resize-none"
                   ></textarea>
                 </div>
               </div>
             )}
 
-            {/* Navigation Buttons */}
+            {/* Step 2: Venue & Guest Details */}
+            {currentStep === 2 && (
+              <div className="space-y-8">
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Venue Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. The Grand Ballroom, Nairobi"
+                    value={formData.venue}
+                    onChange={(e) => updateFormData('venue', e.target.value)}
+                    className="input-prestige"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Address</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Full address of the venue..."
+                    value={formData.address}
+                    onChange={(e) => updateFormData('address', e.target.value)}
+                    className="input-prestige resize-none"
+                  ></textarea>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="flex flex-col">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Date</label>
+                    <input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => updateFormData('date', e.target.value)}
+                      className="input-prestige"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Start Time</label>
+                    <input
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => updateFormData('time', e.target.value)}
+                      className="input-prestige"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Maximum Guests</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 200"
+                    min="1"
+                    value={formData.maxGuests}
+                    onChange={(e) => updateFormData('maxGuests', e.target.value)}
+                    className="input-prestige"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Pricing */}
+            {currentStep === 3 && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="flex flex-col">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Ticket Price</label>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      value={formData.ticketPrice}
+                      onChange={(e) => updateFormData('ticketPrice', e.target.value)}
+                      className="input-prestige"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Currency</label>
+                    <select
+                      value={formData.currency}
+                      onChange={(e) => updateFormData('currency', e.target.value)}
+                      className="input-prestige cursor-pointer"
+                    >
+                      <option value="USD">USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="KES">KES (KSh)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant/10">
+                  <p className="text-on-surface-variant text-sm">
+                    <strong>Note:</strong> Setting a price of $0.00 will make this a free event. Guests can still RSVP and receive invitations.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Finalize */}
+            {currentStep === 4 && (
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <h3 className="text-xl font-headline font-bold text-primary">Review Your Event</h3>
+
+                  <div className="space-y-4 p-6 bg-surface-container-low rounded-xl">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-bold text-primary">Event:</span> {formData.name || 'Not specified'}
+                      </div>
+                      <div>
+                        <span className="font-bold text-primary">Type:</span> {formData.type}
+                      </div>
+                      <div>
+                        <span className="font-bold text-primary">Date:</span> {formData.date || 'Not specified'}
+                      </div>
+                      <div>
+                        <span className="font-bold text-primary">Venue:</span> {formData.venue || 'Not specified'}
+                      </div>
+                      <div>
+                        <span className="font-bold text-primary">Guests:</span> {formData.maxGuests || 'Unlimited'}
+                      </div>
+                      <div>
+                        <span className="font-bold text-primary">Price:</span> {formData.ticketPrice ? `${formData.currency} ${formData.ticketPrice}` : 'Free'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="isPublic"
+                    checked={formData.isPublic}
+                    onChange={(e) => updateFormData('isPublic', e.target.checked)}
+                    className="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary"
+                  />
+                  <label htmlFor="isPublic" className="text-sm text-on-surface-variant">
+                    Make this event public (visible to all users)
+                  </label>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-error-container border border-error/20 rounded-xl">
+                    <p className="text-error text-sm font-medium">{error}</p>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex justify-between items-center pt-8 border-t border-outline-variant/10">
               <button 
                 onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
@@ -105,8 +337,12 @@ export default function CreateEvent() {
                   Continue <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
-                <button className="btn-prestige-primary bg-secondary from-secondary to-secondary-fixed">
-                  Curate Experience
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="btn-prestige-primary bg-secondary from-secondary to-secondary-fixed disabled:opacity-50"
+                >
+                  {isLoading ? 'Creating...' : 'Curate Experience'}
                 </button>
               )}
             </div>
