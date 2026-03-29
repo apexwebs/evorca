@@ -21,19 +21,23 @@ export default function CreateEvent() {
     // Step 1: Basic Info
     name: '',
     type: 'Corporate Summit',
+    category: 'Conference',
     dressCode: '',
     description: '',
+    posterImage: null as File | null,
 
     // Step 2: Venue & Guest
     venue: '',
     address: '',
+    city: '',
     date: '',
     time: '',
     maxGuests: '',
 
     // Step 3: Pricing
     ticketPrice: '',
-    currency: 'USD',
+    currency: 'KES',
+    ticketType: 'General',
 
     // Step 4: Finalize
     isPublic: false,
@@ -42,8 +46,15 @@ export default function CreateEvent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const updateFormData = (field: string, value: string | boolean) => {
+  const updateFormData = (field: string, value: string | boolean | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      updateFormData('posterImage', file)
+    }
   }
 
   const handleSubmit = async () => {
@@ -51,34 +62,52 @@ export default function CreateEvent() {
     setError('')
 
     try {
+      // Validate required fields
+      if (!formData.name || !formData.date || !formData.time || !formData.venue) {
+        setError('Please fill in all required fields: Event Name, Date, Time, and Venue')
+        setIsLoading(false)
+        return
+      }
+
+      // Create FormData for file upload
+      const data = new FormData()
+      data.append('title', formData.name)
+      data.append('description', formData.description)
+      data.append('date', formData.date)
+      data.append('time', formData.time)
+      data.append('venue', formData.venue)
+      data.append('address', formData.address)
+      data.append('city', formData.city)
+      data.append('maxGuests', formData.maxGuests)
+      data.append('dressCode', formData.dressCode)
+      data.append('type', formData.type)
+      data.append('ticketPrice', formData.ticketPrice)
+      data.append('currency', formData.currency)
+      data.append('ticketType', formData.ticketType)
+      data.append('isPublic', formData.isPublic.toString())
+      
+      // Append image if it exists
+      if (formData.posterImage) {
+        data.append('posterImage', formData.posterImage)
+      }
+
       const response = await fetch('/api/events', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: formData.name,
-          description: formData.description,
-          date: formData.date,
-          time: formData.time,
-          venue: formData.venue,
-          address: formData.address,
-          maxGuests: formData.maxGuests,
-          dressCode: formData.dressCode,
-          type: formData.type
-        }),
+        credentials: 'same-origin',
+        body: data,
       })
 
-      const data = await response.json()
+      const responseData = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create event')
+        setError(responseData.error || 'Failed to create event')
         return
       }
 
       // Success - redirect to dashboard
       router.push('/dashboard')
     } catch (err) {
+      console.error('Event creation error:', err)
       setError('Network error. Please try again.')
     } finally {
       setIsLoading(false)
@@ -144,6 +173,15 @@ export default function CreateEvent() {
                       <option>Corporate Summit</option>
                       <option>Wedding Reception</option>
                       <option>Private Soirée</option>
+                      <option>Product Launch</option>
+                      <option>Charity Gala</option>
+                      <option>Awards Ceremony</option>
+                      <option>Networking Event</option>
+                      <option>Conference</option>
+                      <option>Convention</option>
+                      <option>Seminar</option>
+                      <option>Trade Show</option>
+                      <option>Social Event</option>
                     </select>
                   </div>
                   <div className="flex flex-col">
@@ -166,6 +204,26 @@ export default function CreateEvent() {
                     onChange={(e) => updateFormData('description', e.target.value)}
                     className="input-prestige resize-none"
                   ></textarea>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Poster/Image</label>
+                  <div className="border-2 border-dashed border-outline-variant/30 rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="poster-upload"
+                    />
+                    <label htmlFor="poster-upload" className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div className="text-2xl">🖼️</div>
+                      <span className="text-sm font-medium text-primary">
+                        {formData.posterImage ? formData.posterImage.name : 'Click to upload poster image'}
+                      </span>
+                      <span className="text-xs text-on-surface-variant/60">PNG, JPG, GIF up to 5MB</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             )}
@@ -193,6 +251,17 @@ export default function CreateEvent() {
                     onChange={(e) => updateFormData('address', e.target.value)}
                     className="input-prestige resize-none"
                   ></textarea>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">City</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Nairobi"
+                    value={formData.city}
+                    onChange={(e) => updateFormData('city', e.target.value)}
+                    className="input-prestige"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-8">
@@ -258,6 +327,22 @@ export default function CreateEvent() {
                       <option value="KES">KES (KSh)</option>
                     </select>
                   </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Ticket Category</label>
+                  <select
+                    value={formData.ticketType}
+                    onChange={(e) => updateFormData('ticketType', e.target.value)}
+                    className="input-prestige cursor-pointer"
+                  >
+                    <option value="General">General Admission</option>
+                    <option value="VIP">VIP Pass</option>
+                    <option value="Early Bird">Early Bird</option>
+                    <option value="Group">Group Pass</option>
+                    <option value="Student">Student Pass</option>
+                    <option value="Premium">Premium Pass</option>
+                  </select>
                 </div>
 
                 <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant/10">

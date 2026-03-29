@@ -130,7 +130,7 @@ export default function LoginPage() {
       <footer className="pt-12 text-center">
         <p className="text-on-surface-variant text-sm font-body">
           Not part of the curation yet?{' '}
-          <Link href="#" className="text-primary font-bold hover:text-secondary transition-all">
+          <Link href="/auth/register" className="text-primary font-bold hover:text-secondary transition-all">
             Join Evorca Prestige
           </Link>
         </p>

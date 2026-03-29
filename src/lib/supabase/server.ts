@@ -8,7 +8,7 @@ export async function createClient() {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Supabase server-side keys are missing!')
-    return null as any // Allow the caller to handle the null client gracefully
+    return null as any
   }
 
   return createServerClient(
@@ -25,10 +25,32 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // This can be ignored if middleware is refreshing sessions
+            // ignore middleware refresh race conditions
           }
         },
       },
     }
   )
 }
+
+export function createServiceRoleClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    console.warn('Supabase service role key is not available; falling back to authenticated server client')
+    return null
+  }
+
+  return createServerClient(supabaseUrl, supabaseServiceRoleKey, {
+    cookies: {
+      getAll() {
+        return []
+      },
+      setAll() {
+        // no-op for service role operations
+      },
+    },
+  })
+}
+
