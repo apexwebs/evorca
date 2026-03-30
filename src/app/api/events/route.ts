@@ -48,16 +48,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!userId && !serviceClient) {
-      console.error('Event creation blocked: no authenticated user session')
+    if (!userId) {
+      console.error('Event creation blocked: no authenticated user session (userId missing)')
       return NextResponse.json({ error: 'You must be signed in to create events' }, { status: 401 })
     }
 
-    const supabase = serviceClient ?? authClient
-
-    if (!supabase) {
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
+    if (!authClient) {
+      return NextResponse.json({ error: 'Authentication client not available' }, { status: 500 })
     }
+
+    const supabase = authClient
 
     // Ensure profile exists before event insert to satisfy FK constraint
     if (userId) {
@@ -94,6 +94,8 @@ export async function POST(request: NextRequest) {
         }
       }
     }
+
+    console.log('Event creation: userId', userId, 'title', title)
 
     // Upload poster image if provided
     let posterUrl: string | null = null
