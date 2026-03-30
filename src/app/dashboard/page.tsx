@@ -135,32 +135,34 @@ export default function Dashboard() {
           /* Events List */
           <div className="space-y-4">
             {events.map((event) => (
-              <div key={event.id} className="prestige-card p-6 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h4 className="font-headline font-bold text-lg text-primary mb-2">{event.title}</h4>
-                    <div className="flex items-center gap-4 text-sm text-on-surface-variant">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.date_start).toLocaleDateString()}</span>
-                      </div>
-                      {event.max_guests && (
+              <Link key={event.id} href={`/dashboard/events/${event.id}`}>
+                <div className="prestige-card p-6 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all cursor-pointer hover:shadow-lg">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="font-headline font-bold text-lg text-primary mb-2">{event.title}</h4>
+                      <div className="flex items-center gap-4 text-sm text-on-surface-variant">
                         <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          <span>{event.max_guests} guests</span>
+                          <Calendar className="w-4 h-4" />
+                          <span>{new Date(event.date_start).toLocaleDateString()}</span>
                         </div>
-                      )}
+                        {event.max_guests && (
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            <span>{event.max_guests} guests</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
+                      event.status === 'published'
+                        ? 'bg-primary/10 text-primary'
+                        : 'bg-outline-variant/10 text-on-surface-variant'
+                    }`}>
+                      {event.status}
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
-                    event.status === 'published'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-outline-variant/10 text-on-surface-variant'
-                  }`}>
-                    {event.status}
-                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

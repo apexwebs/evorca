@@ -99,25 +99,35 @@ export async function POST(request: NextRequest) {
 
     // Upload poster image if provided
     let posterUrl: string | null = null
-    if (posterImage && posterImage.size > 0) {
+    if (posterImage && typeof (posterImage as any).arrayBuffer === 'function') {
       try {
-        const fileName = `${Date.now()}-${posterImage.name}`
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('event-posters')
-          .upload(fileName, await posterImage.arrayBuffer(), {
-            contentType: posterImage.type,
-            upsert: false,
-          })
+        const storageClient = createServiceRoleClient() || supabase
+        if (!storageClient) {
+          console.error('No storage client available for image upload')
+        } else {
+          const fileName = `${Date.now()}-${(posterImage as File).name}`
+          const fileType = (posterImage as File).type || 'application/octet-stream'
+          const buffer = await (posterImage as File).arrayBuffer()
 
-        if (uploadError) {
-          console.error('Image upload error:', uploadError)
-          // Continue without image rather than fail
-        } else if (uploadData) {
-          posterUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-posters/${fileName}`
+          const { data: uploadData, error: uploadError } = await storageClient.storage
+            .from('event-posters')
+            .upload(fileName, buffer, {
+              contentType: fileType,
+              upsert: false,
+            })
+
+          if (uploadError) {
+            console.error('Image upload error:', uploadError)
+            return NextResponse.json({ error: 'Image upload failed. Please try again.' }, { status: 500 })
+          }
+
+          if (uploadData) {
+            posterUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-posters/${fileName}`
+          }
         }
       } catch (imgError) {
         console.error('Image processing error:', imgError)
-        // Continue without image
+        return NextResponse.json({ error: 'Invalid image file or unsupported format.' }, { status: 400 })
       }
     }
 
