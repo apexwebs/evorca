@@ -137,10 +137,10 @@ export default function EventHubPage() {
           <EditTab event={event} eventId={eventId as string} />
         )}
         {activeTab === 'analytics' && (
-          <AnalyticsTab eventId={eventId as string} />
+          <AnalyticsTab />
         )}
         {activeTab === 'settings' && (
-          <SettingsTab event={event} eventId={eventId as string} />
+          <SettingsTab />
         )}
       </div>
     </div>
@@ -222,7 +222,7 @@ function GuestsTab({ eventId }: { eventId: string }) {
   )
 }
 
-function EditTab({ event, eventId }: { event: EventDetails; eventId: string }) {
+function EditTab({ eventId }: { event: EventDetails; eventId: string }) {
   return (
     <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
       <p className="text-on-surface-variant mb-6">Edit event details and update the poster image.</p>
@@ -233,7 +233,7 @@ function EditTab({ event, eventId }: { event: EventDetails; eventId: string }) {
   )
 }
 
-function AnalyticsTab({ eventId }: { eventId: string }) {
+function AnalyticsTab() {
   return (
     <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
       <p className="text-on-surface-variant">Event analytics and performance metrics coming soon.</p>
@@ -241,7 +241,7 @@ function AnalyticsTab({ eventId }: { eventId: string }) {
   )
 }
 
-function SettingsTab(_: { event: EventDetails; eventId: string }) {
+function SettingsTab() {
   return (
     <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
       <p className="text-on-surface-variant">Event settings and configuration coming soon.</p>

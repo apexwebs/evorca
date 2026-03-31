@@ -64,49 +64,210 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    const body = await request.json()
+    // Check if this is multipart form data or JSON
+    const contentType = request.headers.get('content-type') || ''
+    const isFormData = contentType.includes('multipart/form-data')
+
     const updatePayload: Record<string, unknown> = {}
+    let posterFile: File | null = null
+    let removePoster = false
 
-    const updatableFields = [
-      'title',
-      'description',
-      'date_start',
-      'location_name',
-      'location_address',
-      'city',
-      'max_guests',
-      'status',
-      'event_type',
-      'category',
-      'dress_code',
-      'ticket_price',
-      'currency',
-      'ticket_type',
-      'is_public',
-      'poster_url',
-    ]
+    if (isFormData) {
+      const formData = await request.formData()
 
-    updatableFields.forEach((field) => {
-      if (body[field] !== undefined) {
-        updatePayload[field] = body[field]
+      // Extract fields
+      const fields = [
+        'title',
+        'description',
+        'date',
+        'time',
+        'location_name',
+        'location_address',
+        'city',
+        'max_guests',
+        'status',
+        'event_type',
+        'dress_code',
+        'ticket_price',
+        'currency',
+        'ticket_type',
+        'is_public',
+      ]
+
+      fields.forEach((field) => {
+        const value = formData.get(field)
+        if (value !== null) {
+          updatePayload[field] = value
+        }
+      })
+
+      // Check for image file
+      posterFile = formData.get('posterImage') as File | null
+      removePoster = formData.get('removePoster') === 'true'
+
+      // Handle numeric/date conversions
+      if (updatePayload.max_guests) {
+        updatePayload.max_guests = parseInt(updatePayload.max_guests as string, 10)
       }
-    })
+      if (updatePayload.ticket_price) {
+        updatePayload.ticket_price = parseFloat(updatePayload.ticket_price as string)
+      }
+      if (updatePayload.is_public) {
+        updatePayload.is_public = updatePayload.is_public === 'true'
+      }
 
-    if (typeof body.max_guests === 'string') {
-      updatePayload.max_guests = body.max_guests ? parseInt(body.max_guests, 10) : null
-    }
+      if (updatePayload.date && updatePayload.time) {
+        const dt = new Date(
+          `${updatePayload.date as string}T${updatePayload.time as string}`
+        )
+        if (!Number.isNaN(dt.getTime())) {
+          updatePayload.date_start = dt.toISOString()
+        }
+        delete updatePayload.date
+        delete updatePayload.time
+      }
 
-    if (body.ticket_price !== undefined) {
-      updatePayload.ticket_price = body.ticket_price ? parseFloat(body.ticket_price) : null
-    }
+      // Handle image upload or removal
+      if (posterFile) {
+        const storageClient = createServiceRoleClient()
+        if (!storageClient) {
+          return NextResponse.json(
+            { error: 'Storage service unavailable' },
+            { status: 500 }
+          )
+        }
 
-    if (body.date && body.time) {
-      const dt = new Date(`${body.date}T${body.time}`)
-      if (!Number.isNaN(dt.getTime())) {
-        updatePayload.date_start = dt.toISOString()
+        // Get current event to clean up old poster if exists
+        const { data: currentEvent, error: fetchError } = await authClient
+          .from('events')
+          .select('poster_url')
+          .eq('id', eventId)
+          .eq('created_by', user.id)
+          .single()
+
+        if (fetchError || !currentEvent) {
+          return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+        }
+
+        // Remove old poster if it exists
+        if (currentEvent.poster_url) {
+          try {
+            const oldFileName = currentEvent.poster_url
+              .split('/event-posters/')
+              .pop()
+            if (oldFileName) {
+              await storageClient.storage
+                .from('event-posters')
+                .remove([oldFileName])
+            }
+          } catch (err) {
+            console.warn('Failed to remove old poster:', err)
+          }
+        }
+
+        // Upload new poster
+        const fileName = `${eventId}-${Date.now()}`
+        const { error: uploadError } = await storageClient.storage
+          .from('event-posters')
+          .upload(fileName, posterFile, { upsert: true })
+
+        if (uploadError) {
+          console.error('Image upload error:', uploadError)
+          return NextResponse.json({ error: 'Image upload failed' }, { status: 500 })
+        }
+
+        // Generate public URL
+        const {
+          data: { publicUrl },
+        } = storageClient.storage
+          .from('event-posters')
+          .getPublicUrl(fileName)
+
+        updatePayload.poster_url = publicUrl
+      } else if (removePoster) {
+        // Get current event to clean up old poster
+        const { data: currentEvent, error: fetchError } = await authClient
+          .from('events')
+          .select('poster_url')
+          .eq('id', eventId)
+          .eq('created_by', user.id)
+          .single()
+
+        if (fetchError || !currentEvent) {
+          return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+        }
+
+        // Remove poster from storage if it exists
+        if (currentEvent.poster_url) {
+          try {
+            const storageClient = createServiceRoleClient()
+            if (storageClient) {
+              const fileName = currentEvent.poster_url
+                .split('/event-posters/')
+                .pop()
+              if (fileName) {
+                await storageClient.storage
+                  .from('event-posters')
+                  .remove([fileName])
+              }
+            }
+          } catch (err) {
+            console.warn('Failed to remove poster:', err)
+          }
+        }
+
+        updatePayload.poster_url = null
+      }
+    } else {
+      // JSON request
+      const body = await request.json()
+
+      const updatableFields = [
+        'title',
+        'description',
+        'date',
+        'time',
+        'location_name',
+        'location_address',
+        'city',
+        'max_guests',
+        'status',
+        'event_type',
+        'category',
+        'dress_code',
+        'ticket_price',
+        'currency',
+        'ticket_type',
+        'is_public',
+      ]
+
+      updatableFields.forEach((field) => {
+        if (body[field] !== undefined) {
+          updatePayload[field] = body[field]
+        }
+      })
+
+      if (typeof body.max_guests === 'string') {
+        updatePayload.max_guests = body.max_guests
+          ? parseInt(body.max_guests, 10)
+          : null
+      }
+
+      if (body.ticket_price !== undefined) {
+        updatePayload.ticket_price = body.ticket_price
+          ? parseFloat(body.ticket_price)
+          : null
+      }
+
+      if (body.date && body.time) {
+        const dt = new Date(`${body.date}T${body.time}`)
+        if (!Number.isNaN(dt.getTime())) {
+          updatePayload.date_start = dt.toISOString()
+        }
       }
     }
 
+    // Update event in database
     const { data: event, error } = await authClient
       .from('events')
       .update(updatePayload)
