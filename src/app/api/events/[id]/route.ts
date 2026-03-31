@@ -16,11 +16,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
+    // First try to fetch and validate ownership/public access
     const { data: event, error } = await authClient
       .from('events')
       .select('*')
       .eq('id', eventId)
-      .eq('created_by', user.id)
       .single()
 
     if (error) {
@@ -30,6 +30,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         return NextResponse.json({ error: 'Event not found' }, { status: 404 })
       }
       return NextResponse.json({ error: 'Could not fetch event' }, { status: 500 })
+    }
+
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    const isOwned = user ? event.created_by === user.id : false
+    const isPublic = event.is_public === true
+
+    if (!isOwned && !isPublic) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     return NextResponse.json({ event })
