@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { PostgrestError } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -141,18 +141,57 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    const { error } = await authClient
+    // Fetch event first to get poster_url for cleanup
+    const { data: event, error: fetchError } = await authClient
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .eq('created_by', user.id)
+      .single()
+
+    if (fetchError || !event) {
+      console.error('Event fetch before delete error:', fetchError)
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    // Delete the event from database
+    const { error: deleteError } = await authClient
       .from('events')
       .delete()
       .eq('id', eventId)
       .eq('created_by', user.id)
 
-    if (error) {
-      console.error('Event deletion error:', error)
+    if (deleteError) {
+      console.error('Event deletion error:', deleteError)
       return NextResponse.json({ error: 'Could not delete event' }, { status: 500 })
     }
 
-    return NextResponse.json({ message: 'Event deleted' })
+    // Clean up poster image from storage if it exists
+    if (event.poster_url) {
+      try {
+        const storageClient = createServiceRoleClient()
+        if (storageClient) {
+          // Extract filename from poster_url
+          // URL format: https://...supabase.co/storage/v1/object/public/event-posters/{filename}
+          const fileName = event.poster_url.split('/event-posters/').pop()
+
+          if (fileName) {
+            const { error: storageError } = await storageClient.storage
+              .from('event-posters')
+              .remove([fileName])
+
+            if (storageError) {
+              console.warn('Image deletion warning (event already deleted from DB):', storageError)
+            }
+          }
+        }
+      } catch (storageErr) {
+        console.warn('Storage cleanup error (event already deleted from DB):', storageErr)
+        // Don't fail the API response - event is already deleted from DB
+      }
+    }
+
+    return NextResponse.json({ message: 'Event deleted successfully' })
   } catch (err) {
     console.error('Event DELETE error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
