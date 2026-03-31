@@ -136,7 +136,7 @@ export default function Dashboard() {
           /* Events List */
           <div className="space-y-4">
             {events.map((event) => (
-              <Link key={event.id} href={`/dashboard/events/${event.id}`}>
+              <Link key={event.id} href={`/dashboard/events/hub/${event.id}`}>
                 <div className="prestige-card p-6 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all cursor-pointer hover:shadow-lg">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
