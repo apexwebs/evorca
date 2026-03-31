@@ -167,11 +167,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
         // Upload new poster
         const fileName = `${eventId}-${Date.now()}`
-        const { error: uploadError } = await storageClient.storage
+        const { data: uploadData, error: uploadError } = await storageClient.storage
           .from('event-posters')
           .upload(fileName, posterFile, { upsert: true })
 
-        if (uploadError) {
+        if (uploadError || !uploadData) {
           console.error('Image upload error:', uploadError)
           return NextResponse.json({ error: 'Image upload failed' }, { status: 500 })
         }

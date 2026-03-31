@@ -195,10 +195,32 @@ function OverviewTab({ event, eventId }: { event: EventDetails; eventId: string 
           </button>
 
           <Link href={`/events/${eventId}`} className="w-full text-center btn-prestige-secondary inline-flex items-center justify-center gap-2 text-sm">
-            View as Guest
+            View Public Page
           </Link>
 
-          <button className="w-full btn-prestige-danger inline-flex items-center justify-center gap-2 text-sm">
+          <button
+            onClick={async () => {
+              if (!window.confirm('Delete this event? This cannot be undone.')) return
+
+              try {
+                const res = await fetch(`/api/events/${eventId}`, {
+                  method: 'DELETE',
+                })
+                const data = await res.json()
+
+                if (!res.ok) {
+                  alert(data.error || 'Failed to delete the event')
+                  return
+                }
+
+                window.location.href = '/dashboard'
+              } catch (error) {
+                console.error('Event delete failed:', error)
+                alert('Network error while deleting event')
+              }
+            }}
+            className="w-full btn-prestige-danger inline-flex items-center justify-center gap-2 text-sm"
+          >
             <Trash2 className="w-4 h-4" />
             Delete Event
           </button>
@@ -227,7 +249,7 @@ function EditTab({ eventId }: { event: EventDetails; eventId: string }) {
     <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
       <p className="text-on-surface-variant mb-6">Edit event details and update the poster image.</p>
       <Link href={`/dashboard/events/${eventId}/edit`} className="btn-prestige-primary">
-        Go to Edit Page
+        Edit Event Details
       </Link>
     </div>
   )

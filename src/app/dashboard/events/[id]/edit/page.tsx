@@ -125,7 +125,6 @@ export default function EventEditPage() {
 
     if (!eventId) {
       setError('Invalid event ID.')
-      setSaving(false)
       return
     }
 
@@ -164,7 +163,6 @@ export default function EventEditPage() {
         const data = await res.json()
         if (!res.ok) {
           setError(data.error || 'Failed to update event.')
-          setSaving(false)
           return
         }
       } else {
@@ -196,7 +194,6 @@ export default function EventEditPage() {
         const data = await res.json()
         if (!res.ok) {
           setError(data.error || 'Failed to update event.')
-          setSaving(false)
           return
         }
       }
@@ -277,21 +274,23 @@ export default function EventEditPage() {
                 />
               </div>
               <p className="text-xs text-on-surface-variant">Current poster image</p>
-              <button 
-                type="button"
-                onClick={() => document.getElementById('posterInput')?.click()}
-                className="btn-prestige-secondary text-sm"
-              >
-                Change Image
-              </button>
-              <button 
-                type="button"
-                onClick={handleRemovePoster}
-                className="btn-prestige-danger text-sm inline-flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                Remove Image
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  type="button"
+                  onClick={() => document.getElementById('posterInput')?.click()}
+                  className="btn-prestige-secondary text-sm flex-1"
+                >
+                  Change Image
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleRemovePoster}
+                  className="btn-prestige-danger text-sm inline-flex items-center gap-2 flex-1 justify-center"
+                >
+                  <X className="w-4 h-4" />
+                  Remove
+                </button>
+              </div>
             </div>
           )}
 
