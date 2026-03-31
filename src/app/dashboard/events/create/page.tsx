@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, MapPin, Sparkles, ChevronRight, ChevronLeft, Check, Ticket, Image as ImageIcon } from 'lucide-react'
-import Link from 'next/link'
+import { MapPin, Sparkles, ChevronRight, ChevronLeft, Check, Ticket, Image as ImageIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 const steps = [
@@ -448,7 +447,7 @@ export default function CreateEvent() {
             <div className="p-8 space-y-8">
               <div className="space-y-4">
                 <p className="text-on-surface-variant text-sm italic leading-relaxed">
-                  "I'm ready to help you curate the perfect ambiance. Tell me a bit more, and I can generate an editorial description or an AI-designed poster."
+                  I am ready to help you curate the perfect ambiance. Tell me a bit more, and I can generate an editorial description or an AI-designed poster.
                 </p>
                 <button className="w-full py-3 bg-surface-container-low rounded-xl text-primary text-xs font-bold uppercase tracking-widest hover:bg-surface-container-high transition-all border border-primary/10">
                   Generate Editorial Copy

@@ -29,7 +29,8 @@ export default function Dashboard() {
         }
 
         setEvents(data.events || [])
-      } catch (err) {
+      } catch (error) {
+        console.error('Dashboard fetchEvents failed:', error)
         setError('Network error. Please try again.')
       } finally {
         setIsLoading(false)

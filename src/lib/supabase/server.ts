@@ -8,7 +8,7 @@ export async function createClient() {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Supabase server-side keys are missing!')
-    return null as any
+    return null
   }
 
   return createServerClient(

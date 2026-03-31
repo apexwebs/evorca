@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const currency = formData.get('currency') as string
     const ticketType = formData.get('ticketType') as string
     const isPublic = formData.get('isPublic') === 'true'
-    const posterImage = formData.get('posterImage') as File | null
+    const posterImage = formData.get('posterImage')
 
     if (!title || !date || !time || !venue) {
       return NextResponse.json(
@@ -99,15 +99,15 @@ export async function POST(request: NextRequest) {
 
     // Upload poster image if provided
     let posterUrl: string | null = null
-    if (posterImage && typeof (posterImage as any).arrayBuffer === 'function') {
+    if (posterImage instanceof File) {
       try {
         const storageClient = createServiceRoleClient() || supabase
         if (!storageClient) {
           console.error('No storage client available for image upload')
         } else {
-          const fileName = `${Date.now()}-${(posterImage as File).name}`
-          const fileType = (posterImage as File).type || 'application/octet-stream'
-          const buffer = await (posterImage as File).arrayBuffer()
+          const fileName = `${Date.now()}-${posterImage.name}`
+          const fileType = posterImage.type || 'application/octet-stream'
+          const buffer = await posterImage.arrayBuffer()
 
           const { data: uploadData, error: uploadError } = await storageClient.storage
             .from('event-posters')
@@ -162,7 +162,8 @@ export async function POST(request: NextRequest) {
     if (eventError) {
       console.error('Event creation error:', eventError)
 
-      if ((eventError as any)?.code === 'PGRST205') {
+      const eventErrorCode = (eventError as { code?: string }).code
+      if (eventErrorCode === 'PGRST205') {
         return NextResponse.json({
           error: 'No events table exists in Supabase, ensure schema is installed',
         }, { status: 500 })
@@ -215,7 +216,8 @@ export async function GET() {
       console.error('Events fetch error:', eventsError)
 
       // In cases where the table is not available yet, return empty events for UX continuity.
-      if ((eventsError as any)?.code === 'PGRST205') {
+      const eventsErrorCode = (eventsError as { code?: string }).code
+      if (eventsErrorCode === 'PGRST205') {
         return NextResponse.json({ events: [] })
       }
 

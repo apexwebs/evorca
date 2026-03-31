@@ -22,7 +22,7 @@ export default function AuthLayout({
             Evorca Prestige
           </h1>
           <p className="text-white/70 text-lg font-body leading-relaxed tracking-wide">
-            "The experience is defined by what is felt rather than what is merely seen."
+            The experience is defined by what is felt rather than what is merely seen.
           </p>
           <div className="mt-12 flex justify-center gap-2">
             {[1, 2, 3].map((i) => (

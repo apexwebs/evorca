@@ -47,7 +47,8 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push('/auth/login')
       }, 2000)
-    } catch (err) {
+    } catch (error) {
+      console.error('Registration request error:', error)
       setError('Network error. Please try again.')
     } finally {
       setIsLoading(false)

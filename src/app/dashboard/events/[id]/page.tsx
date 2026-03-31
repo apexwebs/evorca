@@ -1,9 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MapPin, Users, Ticket, Trash2, Edit, Share2 } from 'lucide-react'
+import { Calendar, Trash2, Edit, Share2 } from 'lucide-react'
 
 interface EventDetails {
   id: string
@@ -51,7 +52,8 @@ export default function EventDetailPage() {
         }
 
         setEvent(data.event)
-      } catch (err) {
+      } catch (error) {
+        console.error('Event fetch failed:', error)
         setError('Network error while fetching event')
       } finally {
         setIsLoading(false)
@@ -76,7 +78,8 @@ export default function EventDetailPage() {
       }
 
       router.push('/dashboard')
-    } catch (err) {
+    } catch (error) {
+      console.error('Event delete failed:', error)
       setError('Network error while deleting event')
     }
   }
@@ -132,7 +135,7 @@ export default function EventDetailPage() {
           {/* Poster Image */}
           {event.poster_url && (
             <div className="rounded-lg overflow-hidden border border-outline-variant/15">
-              <img src={event.poster_url} alt={event.title} className="w-full h-80 object-cover" />
+              <Image src={event.poster_url} alt={event.title} width={1280} height={720} className="w-full h-80 object-cover" />
             </div>
           )}
 

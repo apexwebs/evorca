@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
+import type { PostgrestError } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -24,7 +25,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (error) {
       console.error('Event fetch by id error:', error)
-      if ((error as any)?.code === 'PGRST116') {
+      const errorCode = (error as PostgrestError)?.code
+      if (errorCode === 'PGRST116') {
         return NextResponse.json({ error: 'Event not found' }, { status: 404 })
       }
       return NextResponse.json({ error: 'Could not fetch event' }, { status: 500 })
@@ -52,7 +54,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const body = await request.json()
-    const updatePayload: any = {}
+    const updatePayload: Record<string, unknown> = {}
 
     const updatableFields = [
       'title',

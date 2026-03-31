@@ -27,10 +27,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Get initial session
     const getSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
+
+        if (sessionError) {
+          console.warn('Supabase session fetch warning:', sessionError)
+        }
+
         setUser(session?.user ?? null)
       } catch (error) {
         console.error('Error getting session:', error)
+        setUser(null)
       } finally {
         setLoading(false)
       }

@@ -3,10 +3,21 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 
+interface PublicEventDetails {
+  title: string
+  description: string
+  date_start: string
+  location_name: string
+  location_address: string
+  city: string
+  ticket_price?: number | null
+  currency?: string
+}
+
 export default function PublicEventPage() {
   const params = useParams() as { id?: string }
   const eventId = params.id
-  const [event, setEvent] = useState<any>(null)
+  const [event, setEvent] = useState<PublicEventDetails | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
@@ -25,7 +36,8 @@ export default function PublicEventPage() {
           return
         }
         setEvent(data.event)
-      } catch (err) {
+      } catch (error) {
+        console.error('Public event load failed:', error)
         setError('Network error')
       } finally {
         setIsLoading(false)

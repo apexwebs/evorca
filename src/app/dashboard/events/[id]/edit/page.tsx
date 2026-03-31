@@ -68,7 +68,8 @@ export default function EventEditPage() {
           isPublic: !!event.is_public,
           posterUrl: event.poster_url || '',
         })
-      } catch (err) {
+      } catch (error) {
+        console.error('Event loading error:', error)
         setError('Network error when loading event.')
       } finally {
         setIsLoading(false)
@@ -126,7 +127,8 @@ export default function EventEditPage() {
       }
 
       router.push(`/dashboard/events/${eventId}`)
-    } catch (err) {
+    } catch (error) {
+      console.error('Event save error:', error)
       setError('Network error when saving.')
     } finally {
       setSaving(false)

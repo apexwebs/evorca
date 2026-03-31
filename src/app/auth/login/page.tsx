@@ -1,6 +1,7 @@
 'use client'
 
-import { Mail, ArrowRight, UserPlus, Lock } from 'lucide-react'
+import { Mail, ArrowRight, Lock } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -35,7 +36,8 @@ export default function LoginPage() {
 
       // Login successful - redirect to dashboard
       router.push('/dashboard')
-    } catch (err) {
+    } catch (error) {
+      console.error('Login request error:', error)
       setError('Network error. Please try again.')
     } finally {
       setIsLoading(false)
@@ -56,7 +58,7 @@ export default function LoginPage() {
       {/* Social Auth (Glassmorphism Buttons) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <button className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-outline-variant/10 rounded-2xl hover:bg-surface-container-low transition-all shadow-sm active:scale-95 duration-200">
-          <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 opacity-80" />
+          <Image src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} className="opacity-80" />
           <span className="text-sm font-bold uppercase tracking-widest text-on-surface">Google</span>
         </button>
         <button className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-outline-variant/10 rounded-2xl hover:bg-surface-container-low transition-all shadow-sm active:scale-95 duration-200">
