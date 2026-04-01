@@ -270,6 +270,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         if (!Number.isNaN(dt.getTime())) {
           updatePayload.date_start = dt.toISOString()
         }
+        delete updatePayload.date
+        delete updatePayload.time
       }
     }
 

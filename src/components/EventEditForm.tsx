@@ -138,6 +138,7 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
       }
 
       const data = await res.json()
+      console.debug('EventEditForm PUT response', { status: res.status, ok: res.ok, data })
       if (!res.ok) {
         setError(data.error || 'Failed to update event')
         return
