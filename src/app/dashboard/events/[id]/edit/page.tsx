@@ -1,41 +1,34 @@
 'use client'
 
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Upload, X } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import EventEditForm from '@/components/EventEditForm'
+
+type EventDetails = {
+  id: string
+  title: string
+  description: string
+  date_start: string
+  location_name: string
+  location_address: string
+  city: string
+  max_guests: number | null
+  status: string
+  poster_url?: string
+  event_type?: string
+  dress_code?: string
+  ticket_price?: number
+  currency?: string
+  ticket_type?: string
+  is_public?: boolean
+}
 
 export default function EventEditPage() {
   const params = useParams() as { id?: string }
-  const router = useRouter()
   const eventId = params.id
-
+  const [event, setEvent] = useState<EventDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [posterImage, setPosterImage] = useState<File | null>(null)
-  const [posterPreview, setPosterPreview] = useState<string>('')
-  const [existingPosterUrl, setExistingPosterUrl] = useState<string>('')
-  const [removePoster, setRemovePoster] = useState(false)
-
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    venue: '',
-    address: '',
-    city: '',
-    maxGuests: '',
-    status: 'published',
-    eventType: '',
-    dressCode: '',
-    ticketPrice: '',
-    currency: 'KES',
-    ticketType: 'General',
-    isPublic: false,
-  })
 
   useEffect(() => {
     if (!eventId) return
@@ -47,45 +40,40 @@ export default function EventEditPage() {
       try {
         const res = await fetch(`/api/events/${eventId}`)
         const data = await res.json()
-
         if (!res.ok) {
-          setError(data.error || 'Unable to load event.')
+          setError(data.error || 'Unable to load event for editing')
           return
         }
 
-        const event = data.event
-        const dt = new Date(event.date_start)
-
-        setFormData({
-          title: event.title || '',
-          description: event.description || '',
-          date: dt.toISOString().slice(0, 10),
-          time: dt.toISOString().slice(11, 16),
-          venue: event.location_name || '',
-          address: event.location_address || '',
-          city: event.city || '',
-          maxGuests: event.max_guests ? String(event.max_guests) : '',
-          status: event.status || 'published',
-          eventType: event.event_type || '',
-          dressCode: event.dress_code || '',
-          ticketPrice: event.ticket_price ? String(event.ticket_price) : '',
-          currency: event.currency || 'KES',
-          ticketType: event.ticket_type || 'General',
-          isPublic: !!event.is_public,
-        })
-
-        if (event.poster_url) {
-          setExistingPosterUrl(event.poster_url)
-        }
-      } catch (error) {
-        console.error('Event loading error:', error)
-        setError('Network error when loading event.')
+        setEvent(data.event)
+      } catch (err) {
+        console.error('Could not fetch event data for edit:', err)
+        setError('Network error while loading event')
       } finally {
         setIsLoading(false)
       }
-    }
+  }, [eventId])
 
-    fetchEvent()
+  if (!eventId) {
+    return <div className="py-24 text-center">Invalid event selected.</div>
+  }
+
+  if (isLoading) {
+    return <div className="py-24 text-center">Loading edit form...</div>
+  }
+
+  if (error || !event) {
+    return <div className="py-24 text-center text-error">{error || 'Event data not found'}</div>
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto py-12">
+      <EventEditForm eventId={eventId} event={event} onSuccess={() => window.location.href = `/dashboard/events/hub/${eventId}`} />
+    </div>
+  )
+}
+
+    }
   }, [eventId])
 
   const updateFormField = (field: string, value: string | boolean) => {

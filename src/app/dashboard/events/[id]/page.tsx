@@ -1,6 +1,6 @@
 'use client'
 
-import Image from 'next/image'
+import AdaptiveImage from '@/components/AdaptiveImage'
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -135,7 +135,7 @@ export default function EventDetailPage() {
           {/* Poster Image */}
           {event.poster_url && (
             <div className="rounded-lg overflow-hidden border border-outline-variant/15">
-              <Image src={event.poster_url} alt={event.title} width={1280} height={720} className="w-full h-80 object-cover" />
+              <AdaptiveImage src={event.poster_url} alt={event.title} width={1280} height={720} className="w-full h-80 object-cover" />
             </div>
           )}
 

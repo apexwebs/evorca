@@ -1,10 +1,11 @@
 'use client'
 
+import AdaptiveImage from '@/components/AdaptiveImage'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2 } from 'lucide-react'
+import EventEditForm from '@/components/EventEditForm'
 
 interface EventDetails {
   id: string
@@ -156,7 +157,7 @@ function OverviewTab({ event, eventId }: { event: EventDetails; eventId: string 
       <div className="lg:col-span-2 space-y-6">
         {event.poster_url && (
           <div className="rounded-lg overflow-hidden border border-outline-variant/10">
-            <Image src={event.poster_url} alt={event.title} width={1280} height={720} className="w-full h-80 object-cover" />
+            <AdaptiveImage src={event.poster_url} alt={event.title} width={1280} height={720} className="w-full h-80 object-cover" />
           </div>
         )}
 
@@ -244,13 +245,11 @@ function GuestsTab({ eventId }: { eventId: string }) {
   )
 }
 
-function EditTab({ eventId }: { event: EventDetails; eventId: string }) {
+function EditTab({ event, eventId }: { event: EventDetails; eventId: string }) {
   return (
     <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
       <p className="text-on-surface-variant mb-6">Edit event details and update the poster image.</p>
-      <Link href={`/dashboard/events/${eventId}/edit`} className="btn-prestige-primary">
-        Edit Event Details
-      </Link>
+      <EventEditForm event={event} eventId={eventId} onSuccess={() => window.location.href = `/dashboard/events/hub/${eventId}`} />
     </div>
   )
 }
