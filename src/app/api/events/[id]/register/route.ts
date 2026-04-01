@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Failed to check guest capacity' }, { status: 500 })
     }
 
-    if (event.max_guests && guestCount >= event.max_guests) {
+    if (event.max_guests && (guestCount ?? 0) >= event.max_guests) {
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
