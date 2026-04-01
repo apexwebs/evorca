@@ -49,18 +49,19 @@ CREATE TABLE IF NOT EXISTS public.events (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. GUESTS
+-- 4. GUESTS (RSVP and Guest Management)
 CREATE TABLE IF NOT EXISTS public.guests (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
-  full_name TEXT NOT NULL,
-  email TEXT,
+  email TEXT NOT NULL,
+  full_name TEXT,
   phone TEXT,
-  rsvp_status TEXT DEFAULT 'pending' CHECK (rsvp_status IN ('pending', 'confirmed', 'declined')),
-  payment_status TEXT DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'paid', 'processing')),
-  ticket_type TEXT DEFAULT 'standard',
-  qr_code_token UUID DEFAULT gen_random_uuid() UNIQUE, -- For validation
-  scanned_at TIMESTAMPTZ,
+  status TEXT DEFAULT 'invited' CHECK (status IN ('invited', 'confirmed', 'declined', 'checked_in')),
+  ticket_code TEXT UNIQUE,
+  invited_at TIMESTAMPTZ DEFAULT NOW(),
+  registered_at TIMESTAMPTZ,
+  responded_at TIMESTAMPTZ,
+  checked_in_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -20,6 +20,13 @@ export default function PublicEventPage() {
   const [event, setEvent] = useState<PublicEventDetails | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [registrationSuccess, setRegistrationSuccess] = useState('')
+  const [formData, setFormData] = useState({
+    email: '',
+    full_name: '',
+    phone: ''
+  })
 
   useEffect(() => {
     if (!eventId) return
@@ -47,6 +54,43 @@ export default function PublicEventPage() {
     load()
   }, [eventId])
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!eventId) return
+
+    setIsSubmitting(true)
+    setError('')
+    setRegistrationSuccess('')
+
+    try {
+      const res = await fetch(`/api/events/${eventId}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Registration failed')
+        return
+      }
+
+      setRegistrationSuccess(data.message)
+      setFormData({ email: '', full_name: '', phone: '' })
+    } catch (error) {
+      console.error('Registration failed:', error)
+      setError('Network error during registration')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (isLoading) return <div className="py-24 text-center">Loading event details...</div>
   if (error || !event) return <div className="py-24 text-center text-error">{error || 'Event not found'}</div>
 
@@ -58,8 +102,78 @@ export default function PublicEventPage() {
       <p><strong>Venue:</strong> {event.location_name} {event.location_address}</p>
       <p><strong>City:</strong> {event.city}</p>
       <p><strong>Price:</strong> {event.ticket_price ? `${event.currency || 'KES'} ${event.ticket_price}` : 'Free'}</p>
-      <div className="mt-4">
-        <a href="#" className="btn-prestige-primary">Register as Guest (Coming Soon)</a>
+
+      <div className="border-t pt-6">
+        <h2 className="text-2xl font-semibold mb-4">Register for Event</h2>
+
+        {registrationSuccess && (
+          <div className="bg-success/10 border border-success text-success p-4 rounded-lg mb-4">
+            {registrationSuccess}
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-error/10 border border-error text-error p-4 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="full_name" className="block text-sm font-medium mb-1">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Your full name"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium mb-1">
+              Phone Number (Optional)
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="+254 XXX XXX XXX"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn-prestige-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Registering...' : 'Register as Guest'}
+          </button>
+        </form>
       </div>
     </div>
   )
