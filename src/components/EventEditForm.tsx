@@ -78,7 +78,8 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
     setPosterImage(null)
     setPosterPreview('')
     setRemovePoster(true)
-    setExistingPosterUrl('')
+    // Keep existing URL in state until save is confirmed so user can still see current image preview
+    // do not clear existingPosterUrl here, because cancel should restore it visually.
   }
 
   const handleCancelImageChange = () => {
@@ -87,8 +88,8 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
     setRemovePoster(false)
   }
 
-  const handleSubmit = async (evt: React.FormEvent) => {
-    evt.preventDefault()
+  const handleSubmit = async (evt?: React.FormEvent) => {
+    if (evt) evt.preventDefault()
     setIsLoading(true)
     setError('')
 
@@ -216,8 +217,32 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
 
         {removePoster && !posterPreview && (
           <div className="space-y-3 p-4 bg-error-container/10 rounded-lg border border-error/20">
-            <p className="text-sm text-error font-bold">Poster will be removed from this event</p>
-            <button type="button" onClick={() => setRemovePoster(false)} className="btn-prestige-secondary text-sm">Keep Current Image</button>
+            <p className="text-sm text-error font-bold">Poster removal is pending. Click remove now to submit immediately, or undo.</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRemovePoster(false)
+                  setPosterPreview('')
+                }}
+                className="btn-prestige-secondary text-sm flex-1"
+              >
+                Undo remove
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setPosterImage(null)
+                  setPosterPreview('')
+                  setExistingPosterUrl('')
+                  setRemovePoster(true)
+                  await handleSubmit()
+                }}
+                className="btn-prestige-danger text-sm flex-1"
+              >
+                Remove now
+              </button>
+            </div>
           </div>
         )}
 
