@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    return NextResponse.json({ event })
+    return NextResponse.json({ event }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     console.error('Event GET error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -105,21 +105,21 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       posterFile = formData.get('posterImage') as File | null
       removePoster = formData.get('removePoster') === 'true'
 
-      // Handle numeric/date conversions
-      if (updatePayload.max_guests) {
-        updatePayload.max_guests = parseInt(updatePayload.max_guests as string, 10)
+      // Handle numeric/date conversions (and clear empty values explicitly)
+      if (updatePayload.max_guests !== undefined) {
+        const parsedMax = Number(updatePayload.max_guests)
+        updatePayload.max_guests = Number.isFinite(parsedMax) ? parsedMax : null
       }
-      if (updatePayload.ticket_price) {
-        updatePayload.ticket_price = parseFloat(updatePayload.ticket_price as string)
+      if (updatePayload.ticket_price !== undefined) {
+        const parsedPrice = Number(updatePayload.ticket_price)
+        updatePayload.ticket_price = Number.isFinite(parsedPrice) ? parsedPrice : null
       }
-      if (updatePayload.is_public) {
-        updatePayload.is_public = updatePayload.is_public === 'true'
+      if (updatePayload.is_public !== undefined) {
+        updatePayload.is_public = updatePayload.is_public === 'true' || updatePayload.is_public === true
       }
 
       if (updatePayload.date && updatePayload.time) {
-        const dt = new Date(
-          `${updatePayload.date as string}T${updatePayload.time as string}`
-        )
+        const dt = new Date(`${updatePayload.date as string}T${updatePayload.time as string}`)
         if (!Number.isNaN(dt.getTime())) {
           updatePayload.date_start = dt.toISOString()
         }
@@ -165,8 +165,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           }
         }
 
-        // Upload new poster
-        const fileName = `${eventId}-${Date.now()}`
+        // Upload new poster (keep extension; prevent duplicate orphan names)
+        const originalName = (posterFile as any).name || ''
+        const extension = originalName.split('.').pop() || 'jpg'
+        const fileName = `${eventId}-${Date.now()}.${extension}`
+
         const { data: uploadData, error: uploadError } = await storageClient.storage
           .from('event-posters')
           .upload(fileName, posterFile, { upsert: true })
@@ -177,13 +180,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         // Generate public URL
-        const {
-          data: { publicUrl },
-        } = storageClient.storage
+        const publicUrlResult = storageClient.storage
           .from('event-posters')
-          .getPublicUrl(fileName)
+          .getPublicUrl(fileName) as any
 
-        updatePayload.poster_url = publicUrl
+        if (!publicUrlResult?.data?.publicUrl) {
+          console.error('Could not get public URL for uploaded poster', publicUrlResult?.error)
+          return NextResponse.json({ error: 'Failed to generate poster URL' }, { status: 500 })
+        }
+
+        updatePayload.poster_url = publicUrlResult.data.publicUrl
       } else if (removePoster) {
         // Get current event to clean up old poster
         const { data: currentEvent, error: fetchError } = await authClient
@@ -267,6 +273,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
+    if (Object.keys(updatePayload).length === 0) {
+      return NextResponse.json({ message: 'No changes detected' }, { status: 200 })
+    }
+
     // Update event in database
     const { data: event, error } = await authClient
       .from('events')
@@ -281,7 +291,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Could not update event' }, { status: 500 })
     }
 
-    return NextResponse.json({ event })
+    return NextResponse.json({ event }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err) {
     console.error('Event PUT error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

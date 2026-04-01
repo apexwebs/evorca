@@ -107,11 +107,11 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
         location_name: formData.venue,
         location_address: formData.address,
         city: formData.city,
-        max_guests: formData.maxGuests,
+        max_guests: formData.maxGuests ? parseInt(formData.maxGuests, 10) : null,
         status: formData.status,
         event_type: formData.eventType,
         dress_code: formData.dressCode,
-        ticket_price: formData.ticketPrice,
+        ticket_price: formData.ticketPrice ? parseFloat(formData.ticketPrice) : null,
         currency: formData.currency,
         ticket_type: formData.ticketType,
         is_public: formData.isPublic,
@@ -141,6 +141,13 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
       if (!res.ok) {
         setError(data.error || 'Failed to update event')
         return
+      }
+
+      // Persist new poster URL in local form state, and avoid stale image after update
+      if (data?.event?.poster_url) {
+        setExistingPosterUrl(data.event.poster_url)
+      } else if (removePoster) {
+        setExistingPosterUrl('')
       }
 
       if (onSuccess) onSuccess()

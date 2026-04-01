@@ -42,7 +42,7 @@ export default function EventEditPage() {
       setError('')
 
       try {
-        const res = await fetch(`/api/events/${eventId}`)
+        const res = await fetch(`/api/events/${eventId}`, { cache: 'no-store' })
         const data = await res.json()
 
         if (!res.ok) {
