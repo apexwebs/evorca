@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         // Upload new poster (keep extension; prevent duplicate orphan names)
-        const originalName = (posterFile as any).name || ''
+        const originalName = (posterFile as File)?.name || ''
         const extension = originalName.split('.').pop() || 'jpg'
         const fileName = `${eventId}-${Date.now()}.${extension}`
 
@@ -182,10 +182,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         // Generate public URL
         const publicUrlResult = storageClient.storage
           .from('event-posters')
-          .getPublicUrl(fileName) as any
+          .getPublicUrl(fileName)
 
         if (!publicUrlResult?.data?.publicUrl) {
-          console.error('Could not get public URL for uploaded poster', publicUrlResult?.error)
+          console.error('Could not get public URL for uploaded poster', publicUrlResult)
           return NextResponse.json({ error: 'Failed to generate poster URL' }, { status: 500 })
         }
 

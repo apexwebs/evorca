@@ -104,7 +104,7 @@ export default function EventDetailPage() {
     if (activeTab === 'guests' && eventId) {
       fetchGuests()
     }
-  }, [activeTab, eventId])
+  }, [activeTab, eventId, fetchGuests])
 
   const handleInviteGuest = async (e: React.FormEvent) => {
     e.preventDefault()
