@@ -45,7 +45,7 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
     venue: event.location_name || '',
     address: event.location_address || '',
     city: event.city || '',
-    maxGuests: event.max_guests ? String(event.max_guests) : '',
+    maxGuests: event.max_guests !== undefined && event.max_guests !== null ? String(event.max_guests) : '',
     status: event.status || 'published',
     eventType: event.event_type || '',
     dressCode: event.dress_code || '',
@@ -108,7 +108,7 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
         location_name: formData.venue,
         location_address: formData.address,
         city: formData.city,
-        max_guests: formData.maxGuests ? parseInt(formData.maxGuests, 10) : null,
+        max_guests: formData.maxGuests !== '' ? parseInt(formData.maxGuests, 10) : null,
         status: formData.status,
         event_type: formData.eventType,
         dress_code: formData.dressCode,
@@ -280,6 +280,20 @@ export default function EventEditForm({ event, eventId, onSuccess }: Props) {
         <div>
           <label className="block text-xs font-bold uppercase text-on-surface-variant mb-2">City</label>
           <input value={formData.city} onChange={(e) => updateFormField('city', e.target.value)} className="input-prestige w-full" />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase text-on-surface-variant mb-2">Max Guests</label>
+          <input
+            type="number"
+            min={0}
+            value={formData.maxGuests}
+            onChange={(e) => {
+              const sanitized = e.target.value.replace(/[^0-9]/g, '')
+              updateFormField('maxGuests', sanitized)
+            }}
+            className="input-prestige w-full"
+          />
         </div>
       </div>
 
