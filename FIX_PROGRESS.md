@@ -31,7 +31,10 @@
 - [ ] **DB-002**: Add missing database constraints and indexes
 - [ ] **UI-001**: Break down large components into smaller ones
 - [ ] **ERR-001**: Add error boundaries and error handling
-- [ ] **FEAT-001**: Implement guest management UI
+- [x] **FEAT-001**: Implement guest management UI (incomplete UX; further polish in progress)
+- [x] **INVITE-001**: Organizer share/invite flow (copy link, WA, email) now functional
+- [x] **PUBLIC-001**: Public event registration page now supports Name + Phone only (no email), and endpoint updated
+- [x] **ROUTE-001**: Avoid “View Public Page -> Dashboard”的 mis-redirect by fixing links and APIs
 
 ## Completed Fixes
 - [x] **ANALYSIS-001**: Comprehensive codebase analysis completed (37 issues identified)

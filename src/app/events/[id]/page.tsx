@@ -23,7 +23,6 @@ export default function PublicEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [registrationSuccess, setRegistrationSuccess] = useState('')
   const [formData, setFormData] = useState({
-    email: '',
     full_name: '',
     phone: ''
   })
@@ -71,7 +70,7 @@ export default function PublicEventPage() {
       const res = await fetch(`/api/events/${eventId}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ full_name: formData.full_name, phone: formData.phone })
       })
 
       const data = await res.json()
@@ -82,7 +81,7 @@ export default function PublicEventPage() {
       }
 
       setRegistrationSuccess(data.message)
-      setFormData({ email: '', full_name: '', phone: '' })
+      setFormData({ full_name: '', phone: '' })
     } catch (error) {
       console.error('Registration failed:', error)
       setError('Network error during registration')
@@ -119,22 +118,6 @@ export default function PublicEventPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="your@email.com"
-            />
-          </div>
-
           <div>
             <label htmlFor="full_name" className="block text-sm font-medium mb-1">
               Full Name *

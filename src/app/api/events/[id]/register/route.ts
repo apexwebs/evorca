@@ -11,22 +11,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const body = await request.json()
-    const { email, full_name, phone, ticket_code } = body
+    const { full_name, phone } = body
 
-    if (!email || !full_name) {
-      return NextResponse.json({ error: 'Email and full name are required' }, { status: 400 })
+    if (!full_name || !phone) {
+      return NextResponse.json({ error: 'Full name and phone are required' }, { status: 400 })
     }
 
-    // Check if event exists and is published
+    // Check if event exists and is published/public
     const { data: event, error: eventError } = await authClient
       .from('events')
-      .select('id, title, max_guests, published')
+      .select('id, title, max_guests, status, is_public')
       .eq('id', eventId)
-      .eq('published', true)
       .single()
 
     if (eventError || !event) {
-      return NextResponse.json({ error: 'Event not found or not published' }, { status: 404 })
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    if (event.status !== 'published' && !event.is_public) {
+      return NextResponse.json({ error: 'Event is not open for registration' }, { status: 403 })
     }
 
     // Check current guest count
@@ -45,12 +48,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Event is at maximum capacity' }, { status: 400 })
     }
 
-    // Check if guest already exists
+    // Check if guest already exists by phone
     const { data: existingGuest, error: existingError } = await authClient
       .from('guests')
       .select('*')
       .eq('event_id', eventId)
-      .eq('email', email)
+      .eq('phone', phone)
       .single()
 
     if (existingError && existingError.code !== 'PGRST116') { // PGRST116 is "not found"
@@ -87,9 +90,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .from('guests')
         .insert({
           event_id: eventId,
-          email,
           full_name,
-          phone: phone || null,
+          phone,
           status: 'confirmed',
           registered_at: new Date().toISOString(),
         })

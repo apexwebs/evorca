@@ -248,7 +248,7 @@ function GuestsTab({ event }: { event: EventDetails }) {
   const [guests, setGuests] = useState<Guest[]>([])
   const [guestsLoading, setGuestsLoading] = useState(false)
   const [guestsError, setGuestsError] = useState('')
-  const [inviteForm, setInviteForm] = useState({ email: '', full_name: '', phone: '' })
+  const [inviteForm, setInviteForm] = useState({ full_name: '', phone: '' })
   const [inviteLoading, setInviteLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState('')
 
@@ -292,7 +292,7 @@ function GuestsTab({ event }: { event: EventDetails }) {
       const res = await fetch(`/api/events/${eventId}/guests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(inviteForm),
+        body: JSON.stringify({ full_name: inviteForm.full_name, phone: inviteForm.phone })
       })
 
       const data = await res.json()
@@ -302,7 +302,7 @@ function GuestsTab({ event }: { event: EventDetails }) {
       }
 
       setActionMessage('Invite sent successfully.')
-      setInviteForm({ email: '', full_name: '', phone: '' })
+      setInviteForm({ full_name: '', phone: '' })
       fetchGuests()
     } catch (err) {
       console.error('Invite failed:', err)
@@ -421,27 +421,21 @@ function GuestsTab({ event }: { event: EventDetails }) {
 
       <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
         <h4 className="font-headline text-base font-bold mb-3">Manual Invite</h4>
-        <form onSubmit={handleInvite} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input
-            type="email"
-            className="form-input"
-            placeholder="Guest email"
-            value={inviteForm.email}
-            required
-            onChange={(e) => setInviteForm(prev => ({ ...prev, email: e.target.value }))}
-          />
+        <form onSubmit={handleInvite} className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
             type="text"
             className="form-input"
             placeholder="Full name"
             value={inviteForm.full_name}
             onChange={(e) => setInviteForm(prev => ({ ...prev, full_name: e.target.value }))}
+            required
           />
           <input
             type="tel"
             className="form-input"
             placeholder="Phone"
             value={inviteForm.phone}
+            required
             onChange={(e) => setInviteForm(prev => ({ ...prev, phone: e.target.value }))}
           />
           <div className="md:col-span-3 text-right">
@@ -467,7 +461,7 @@ function GuestsTab({ event }: { event: EventDetails }) {
               <div key={guest.id} className="flex flex-col md:flex-row md:items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">{guest.full_name || 'No name'}</p>
-                  <p className="text-sm text-on-surface-variant">{guest.email} {guest.phone ? `• ${guest.phone}` : ''}</p>
+                  <p className="text-sm text-on-surface-variant">{guest.phone ? guest.phone : 'No phone available'}</p>
                   <p className="text-xs text-on-surface-variant">Ticket: {guest.ticket_code}</p>
                 </div>
                 <div className="flex gap-2 mt-2 md:mt-0">

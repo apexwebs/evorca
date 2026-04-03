@@ -92,10 +92,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const body = await request.json()
-    const { email, full_name, phone } = body
+    const { full_name, phone } = body
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+    if (!full_name || !phone) {
+      return NextResponse.json({ error: 'Full name and phone are required' }, { status: 400 })
     }
 
     // Generate unique ticket code
@@ -105,7 +105,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .from('guests')
       .insert({
         event_id: eventId,
-        email,
         full_name: full_name || null,
         phone: phone || null,
         ticket_code: ticketCode,
@@ -121,7 +120,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // TODO: Send email invitation with ticket code and event details
     // For now, just log it
-    console.log(`Guest invited: ${email} to ${event.title}, ticket: ${ticketCode}`)
+    console.log(`Guest invited: ${full_name} ${phone} to ${event.title}, ticket: ${ticketCode}`)
 
     return NextResponse.json({ guest, message: 'Guest invited successfully' })
   } catch (err) {
