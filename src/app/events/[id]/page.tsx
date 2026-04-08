@@ -105,16 +105,22 @@ export default function PublicEventPage() {
     : ''
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold text-primary">{event.title}</h1>
-      <p className="text-on-surface-variant">{event.description}</p>
-      <p><strong>Date:</strong> {new Date(event.date_start).toLocaleString()}</p>
-      <p><strong>Venue:</strong> {event.location_name} {event.location_address}</p>
-      <p><strong>City:</strong> {event.city}</p>
-      <p><strong>Price:</strong> {event.ticket_price ? `${event.currency || 'KES'} ${event.ticket_price}` : 'Free'}</p>
+    <div className="min-h-screen bg-surface">
+      <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+        <header className="space-y-2 pt-4">
+          <h1 className="text-3xl md:text-4xl font-headline font-extrabold text-primary">{event.title}</h1>
+          <p className="text-on-surface-variant leading-relaxed">{event.description}</p>
+        </header>
 
-      <div className="border-t pt-6">
-        <h2 className="text-2xl font-semibold mb-4">Register for Event</h2>
+        <section className="prestige-card p-5 md:p-6 rounded-xl border border-outline-variant/10 space-y-3">
+          <p><strong>Date:</strong> {new Date(event.date_start).toLocaleString()}</p>
+          <p><strong>Venue:</strong> {event.location_name} {event.location_address}</p>
+          <p><strong>City:</strong> {event.city}</p>
+          <p><strong>Price:</strong> {event.ticket_price ? `${event.currency || 'KES'} ${event.ticket_price}` : 'Free'}</p>
+        </section>
+
+        <section className="prestige-card p-5 md:p-6 rounded-xl border border-outline-variant/10">
+          <h2 className="text-2xl font-semibold mb-4">Register for Event</h2>
 
         {registrationSuccess && (
           <div className="bg-success/10 border border-success text-success p-4 rounded-lg mb-4">
@@ -202,6 +208,7 @@ export default function PublicEventPage() {
             </div>
           </div>
         )}
+        </section>
       </div>
     </div>
   )

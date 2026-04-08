@@ -66,6 +66,15 @@ CREATE TABLE IF NOT EXISTS public.guests (
 
 -- If guests table existed from an older version, ensure the legacy email column is removed.
 ALTER TABLE public.guests DROP COLUMN IF EXISTS email;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'invited';
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS ticket_code TEXT;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS invited_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS registered_at TIMESTAMPTZ;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS responded_at TIMESTAMPTZ;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS checked_in_at TIMESTAMPTZ;
+ALTER TABLE public.guests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;

@@ -50,7 +50,6 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<EventDetails | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
-  const [shareCopied, setShareCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'guests'>('overview')
   const [guests, setGuests] = useState<Guest[]>([])
   const [guestsLoading, setGuestsLoading] = useState(false)
@@ -162,13 +161,13 @@ export default function EventDetailPage() {
     }
   }
 
-  const handleCopyLink = async () => {
-    if (!eventId) return
-
+  const handleShareWhatsApp = () => {
+    if (!eventId || !event) return
     const url = `${window.location.origin}/events/${eventId}`
-    await navigator.clipboard.writeText(url)
-    setShareCopied(true)
-    setTimeout(() => setShareCopied(false), 1300)
+    const text = encodeURIComponent(
+      `Join ${event.title} at ${event.location_name} on ${new Date(event.date_start).toLocaleString()}. Register here: ${url}`
+    )
+    window.open(`https://wa.me/?text=${text}`, '_blank')
   }
 
   if (isLoading) {
@@ -301,12 +300,12 @@ export default function EventDetailPage() {
             <div className="prestige-card p-6 rounded-xl border border-outline-variant/5 space-y-4">
               <h3 className="font-headline font-bold text-primary">Actions</h3>
               
-              <button 
-                onClick={handleCopyLink}
+              <button
+                onClick={handleShareWhatsApp}
                 className="w-full btn-prestige-primary inline-flex items-center justify-center gap-2"
               >
                 <Share2 className="w-4 h-4" />
-                {shareCopied ? 'Link Copied!' : 'Copy Event Link'}
+                Share via WhatsApp
               </button>
 
               <Link 
