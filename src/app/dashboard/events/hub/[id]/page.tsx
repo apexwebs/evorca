@@ -103,15 +103,15 @@ export default function EventHubPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       {/* Header Section */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div>
-          <h1 className="text-display-md text-4xl font-headline font-extrabold text-primary mb-2">
+          <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold text-primary mb-2">
             {event.title}
           </h1>
-          <p className="text-on-surface-variant text-lg">{event.description}</p>
+          <p className="text-on-surface-variant text-base sm:text-lg">{event.description}</p>
           </div>
           <div className="prestige-card px-4 py-3 rounded-xl border border-outline-variant/10">
             <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">Event Status</p>
@@ -143,7 +143,7 @@ export default function EventHubPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
                     isActive
                       ? 'bg-primary text-white'
                       : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-low'
@@ -159,7 +159,7 @@ export default function EventHubPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {activeTab === 'overview' && (
           <OverviewTab event={event} eventId={eventId as string} />
         )}

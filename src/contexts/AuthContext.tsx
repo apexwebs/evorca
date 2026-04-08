@@ -19,8 +19,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
 
+    const syncUserFromServer = async () => {
+      try {
+        const res = await fetch('/api/auth/me', { cache: 'no-store' })
+        const data = await res.json()
+        setUser(data?.user ?? null)
+      } catch (error) {
+        console.error('Auth sync error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (!supabase) {
-      setLoading(false)
+      void syncUserFromServer()
       return
     }
 
@@ -36,22 +48,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.warn('Supabase session fetch warning:', sessionError)
         }
 
-        setUser(session?.user ?? null)
+        if (session?.user) {
+          setUser(session.user)
+          setLoading(false)
+          return
+        }
+
+        // Fallback to server cookie auth, which is the source of truth for route protection.
+        await syncUserFromServer()
       } catch (error) {
         console.error('Error getting session:', error)
-        setUser(null)
-      } finally {
-        setLoading(false)
+        await syncUserFromServer()
       }
     }
 
-    getSession()
+    void getSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: string, session: Session | null) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
+      async (_event: string, session: Session | null) => {
+        if (session?.user) {
+          setUser(session.user)
+          setLoading(false)
+          return
+        }
+        await syncUserFromServer()
       }
     )
 
@@ -60,9 +81,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     const supabase = createClient()
-    if (supabase) {
-      await supabase.auth.signOut()
+    try {
+      // Clear server cookie session first.
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch (error) {
+      console.warn('Server logout warning:', error)
     }
+
+    if (supabase) {
+      try {
+        await supabase.auth.signOut()
+      } catch (error) {
+        console.warn('Client logout warning:', error)
+      }
+    }
+
+    setUser(null)
   }
 
   return (

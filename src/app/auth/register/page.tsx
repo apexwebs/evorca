@@ -56,7 +56,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 prestige-card rounded-2xl border border-outline-variant/10 p-6 sm:p-8 bg-surface-container/40">
       {/* Header Section */}
       <header className="space-y-4">
         <h2 className="text-display-md text-4xl font-headline font-extrabold tracking-tight text-primary">
@@ -76,8 +76,8 @@ export default function RegisterPage() {
 
       {/* Success Display */}
       {success && (
-        <div className="p-4 bg-green-100 border border-green-300 rounded-xl">
-          <p className="text-green-800 text-sm font-medium">{success}</p>
+        <div className="p-4 bg-secondary-fixed/20 border border-secondary/30 rounded-xl">
+          <p className="text-secondary text-sm font-medium">{success}</p>
         </div>
       )}
 
@@ -165,13 +165,14 @@ export default function RegisterPage() {
       </form>
 
       {/* Footer Branding */}
-      <footer className="pt-12 text-center">
+      <footer className="pt-6 text-center space-y-3">
         <p className="text-on-surface-variant text-sm font-body">
           Already part of the curation?{' '}
           <Link href="/auth/login" className="text-primary font-bold hover:text-secondary transition-all">
             Enter The Prestige
           </Link>
         </p>
+        <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/60">Registration creates your organiser profile</p>
       </footer>
     </div>
   )

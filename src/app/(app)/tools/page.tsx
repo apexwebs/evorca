@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Sparkles,
   BarChart3,
@@ -16,29 +17,51 @@ import {
   Bell,
   Globe,
   ChevronRight,
+  LogOut,
+  LogIn,
 } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function ToolsPage() {
-  const [activeTab, setActiveTab] = useState<'ai' | 'insights' | 'account' | 'support'>('ai')
+  const searchParams = useSearchParams()
+  const queryTab = (searchParams.get('tab') || '').toLowerCase()
+  const initialTab: 'ai' | 'insights' | 'account' | 'support' =
+    queryTab === 'insights' || queryTab === 'account' || queryTab === 'support' ? queryTab : 'ai'
+  const [activeTab, setActiveTab] = useState<'ai' | 'insights' | 'account' | 'support'>(initialTab)
+  const router = useRouter()
+  const { user, signOut } = useAuth()
+  const [authActionLoading, setAuthActionLoading] = useState(false)
+
+  const handleLogout = async () => {
+    setAuthActionLoading(true)
+    try {
+      await signOut()
+      router.push('/auth/login')
+    } finally {
+      setAuthActionLoading(false)
+    }
+  }
 
   return (
-    <div className="space-y-10">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6 sm:space-y-8">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
         <div>
-          <h1 className="text-display-md text-4xl font-headline font-extrabold tracking-tight text-primary mb-2">
+          <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold tracking-tight text-primary mb-2">
             Tools & Features
           </h1>
-          <p className="text-on-surface-variant text-lg max-w-2xl">
+          <p className="text-on-surface-variant text-base sm:text-lg max-w-2xl">
             Configure your prestige stack: AI creative workspace, event intelligence, account controls, and support center.
           </p>
         </div>
-        <div className="prestige-card px-5 py-4 rounded-xl border border-secondary/20 bg-secondary-fixed/10">
+        <div className="prestige-card px-4 py-3 rounded-xl border border-secondary/20 bg-secondary-fixed/10">
+          <div className="text-right">
           <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">Workspace Tier</p>
-          <p className="font-headline font-bold text-secondary">Prestige Studio</p>
+          <p className="font-headline text-lg sm:text-base font-bold text-secondary">Prestige Studio</p>
+          </div>
         </div>
       </div>
 
-      <div className="prestige-card p-2 rounded-2xl border border-outline-variant/10">
+      <div className="prestige-card p-2 rounded-xl border border-outline-variant/10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {[
             { id: 'ai', label: 'AI Studio', icon: Sparkles },
@@ -54,7 +77,7 @@ export default function ToolsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as 'ai' | 'insights' | 'account' | 'support')}
-                className={`rounded-xl px-4 py-3 text-left transition-all ${
+                className={`rounded-lg px-3 py-2.5 text-left transition-all ${
                   isActive
                     ? 'bg-primary text-white'
                     : 'bg-surface-container-low text-on-surface hover:bg-surface-container-high'
@@ -62,7 +85,7 @@ export default function ToolsPage() {
               >
                 <div className="flex items-center gap-3">
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-secondary'}`} />
-                  <span className="text-xs font-bold uppercase tracking-widest">{tab.label}</span>
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em]">{tab.label}</span>
                 </div>
               </button>
             )
@@ -73,13 +96,13 @@ export default function ToolsPage() {
       {activeTab === 'ai' && (
         <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           <div className="xl:col-span-8 space-y-6">
-            <div className="relative overflow-hidden prestige-card p-7 rounded-2xl border border-primary/10">
+            <div className="relative overflow-hidden prestige-card p-5 sm:p-6 rounded-xl border border-primary/10">
               <div className="absolute top-0 right-0 p-6 opacity-10">
                 <Brain className="w-24 h-24 text-primary" />
               </div>
               <div className="relative z-10">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">AI Creative Workspace</p>
-                <h2 className="font-headline text-2xl font-bold text-primary mb-3">Curate faster with assisted content lanes</h2>
+                <h2 className="font-headline text-xl sm:text-2xl font-bold text-primary mb-2">Curate faster with assisted content lanes</h2>
                 <p className="text-on-surface-variant leading-relaxed max-w-3xl">
                   Build editorial descriptions, social promotion copy, and guest communication scripts from one place.
                   Designed for your premium East African event voice.
@@ -151,12 +174,40 @@ export default function ToolsPage() {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-4">
             <h2 className="font-headline text-xl font-bold text-primary">Account Settings</h2>
+            <div className="bg-surface-container-low rounded-lg p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">Auth Status</p>
+              <p className="text-sm text-on-surface">
+                {user?.email ? `Signed in as ${user.email}` : 'No active session'}
+              </p>
+            </div>
             {['Profile & Identity', 'Team Permissions', 'Branding Preferences', 'Notification Rules'].map((item) => (
               <button key={item} type="button" className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-left">
                 <span className="text-sm font-medium text-on-surface">{item}</span>
                 <ChevronRight className="w-4 h-4 text-on-surface-variant" />
               </button>
             ))}
+            <div className="pt-1">
+              {user ? (
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-error-container text-error font-semibold"
+                  onClick={handleLogout}
+                  disabled={authActionLoading}
+                >
+                  <LogOut className="w-4 h-4" />
+                  {authActionLoading ? 'Signing out...' : 'Logout'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-white font-semibold"
+                  onClick={() => router.push('/auth/login')}
+                >
+                  <LogIn className="w-4 h-4" />
+                  Go to Login
+                </button>
+              )}
+            </div>
           </div>
           <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-4">
             <h2 className="font-headline text-xl font-bold text-primary">Security & Privacy</h2>

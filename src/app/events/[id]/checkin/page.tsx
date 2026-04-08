@@ -54,9 +54,9 @@ export default function CheckinPage() {
   }
 
   return (
-    <div className="min-h-screen max-w-md mx-auto p-4 space-y-6">
+    <div className="min-h-screen max-w-md mx-auto p-3 sm:p-4 pb-24 space-y-5 sm:space-y-6">
       <div className="space-y-2 pt-8">
-        <h1 className="text-2xl font-bold text-primary">Gate Check-In</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-primary">Gate Check-In</h1>
         <p className="text-on-surface-variant text-sm">
           Scan QR or paste the <span className="font-mono">ticket_code</span> then confirm.
         </p>

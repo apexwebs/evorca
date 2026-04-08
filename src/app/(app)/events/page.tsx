@@ -41,17 +41,17 @@ export default function EventsPage() {
   }, [])
 
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 space-y-8">
-      <div className="flex justify-between items-end">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-5 sm:space-y-7">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-display-md text-4xl font-headline font-extrabold text-primary mb-2">
+          <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold text-primary mb-2">
             Your Events
           </h1>
-          <p className="text-on-surface-variant text-lg">
+          <p className="text-on-surface-variant text-base sm:text-lg">
             Manage and organize all your event experiences in one place.
           </p>
         </div>
-        <Link href="/dashboard/events/create" className="btn-prestige-primary flex items-center gap-2">
+        <Link href="/dashboard/events/create" className="btn-prestige-primary inline-flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-4 rounded-lg text-sm">
           <Plus className="w-4 h-4" />
           New Event
         </Link>
@@ -83,10 +83,10 @@ export default function EventsPage() {
         <div className="space-y-4">
           {events.map((event) => (
             <Link key={event.id} href={`/dashboard/events/hub/${event.id}`}>
-              <div className="prestige-card p-6 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all cursor-pointer hover:shadow-lg">
+              <div className="prestige-card p-4 sm:p-5 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all cursor-pointer hover:shadow-sm">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className="font-headline font-bold text-lg text-primary mb-2">{event.title}</h3>
+                    <h3 className="font-headline font-bold text-lg sm:text-xl text-primary mb-2 leading-tight">{event.title}</h3>
                     <div className="flex items-center gap-4 text-sm text-on-surface-variant">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />

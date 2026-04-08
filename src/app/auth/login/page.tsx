@@ -43,7 +43,7 @@ export default function LoginPage() {
     }
   }
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 prestige-card rounded-2xl border border-outline-variant/10 p-6 sm:p-8 bg-surface-container/40">
       {/* Header Section (Editorial Authority) */}
       <header className="space-y-4">
         <h2 className="text-display-md text-4xl font-headline font-extrabold tracking-tight text-primary">
@@ -54,15 +54,11 @@ export default function LoginPage() {
         </p>
       </header>
 
-      {/* Social Auth (Glassmorphism Buttons) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <button className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-outline-variant/10 rounded-2xl hover:bg-surface-container-low transition-all shadow-sm active:scale-95 duration-200">
+      {/* Social Auth */}
+      <div className="grid grid-cols-1 gap-4">
+        <button type="button" className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-outline-variant/10 rounded-2xl hover:bg-surface-container-low transition-all shadow-sm active:scale-95 duration-200">
           <Globe className="w-5 h-5 text-on-surface-variant/90" />
-          <span className="text-sm font-bold uppercase tracking-widest text-on-surface">Google</span>
-        </button>
-        <button className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-outline-variant/10 rounded-2xl hover:bg-surface-container-low transition-all shadow-sm active:scale-95 duration-200">
-          <Lock className="w-5 h-5 opacity-80" />
-          <span className="text-sm font-bold uppercase tracking-widest text-on-surface">Apple ID</span>
+          <span className="text-sm font-bold uppercase tracking-widest text-on-surface">Continue with Google</span>
         </button>
       </div>
 
@@ -128,13 +124,14 @@ export default function LoginPage() {
       </form>
 
       {/* Footer Branding (High Contrast Clarity) */}
-      <footer className="pt-12 text-center">
+      <footer className="pt-6 text-center space-y-3">
         <p className="text-on-surface-variant text-sm font-body">
           Not part of the curation yet?{' '}
           <Link href="/auth/register" className="text-primary font-bold hover:text-secondary transition-all">
             Join Evorca Prestige
           </Link>
         </p>
+        <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/60">Secure session powered by Supabase Auth</p>
       </footer>
     </div>
   )

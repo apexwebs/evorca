@@ -106,9 +106,9 @@ export default function PublicEventPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+      <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-8 space-y-5 sm:space-y-6 pb-24">
         <header className="space-y-2 pt-4">
-          <h1 className="text-3xl md:text-4xl font-headline font-extrabold text-primary">{event.title}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-headline font-extrabold text-primary">{event.title}</h1>
           <p className="text-on-surface-variant leading-relaxed">{event.description}</p>
         </header>
 
@@ -120,7 +120,7 @@ export default function PublicEventPage() {
         </section>
 
         <section className="prestige-card p-5 md:p-6 rounded-xl border border-outline-variant/10">
-          <h2 className="text-2xl font-semibold mb-4">Register for Event</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4">Register for Event</h2>
 
         {registrationSuccess && (
           <div className="bg-success/10 border border-success text-success p-4 rounded-lg mb-4">

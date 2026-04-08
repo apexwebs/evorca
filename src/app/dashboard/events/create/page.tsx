@@ -44,6 +44,8 @@ export default function CreateEvent() {
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const fieldClass = 'w-full rounded-xl border border-outline-variant/20 bg-surface-container-lowest px-3 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary'
+  const fieldLabelClass = 'text-[10px] font-bold uppercase tracking-[0.14em] text-primary mb-1.5'
 
   const updateFormData = (field: string, value: string | boolean | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -114,60 +116,70 @@ export default function CreateEvent() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-12">
+    <div className="max-w-5xl mx-auto px-3 sm:px-4 space-y-6 sm:space-y-8 pb-24">
       {/* Step Indicator */}
-      <nav className="relative flex justify-between items-center max-w-2xl mx-auto">
-        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-outline-variant/20 -z-10 -translate-y-1/2"></div>
-        {steps.map((step) => (
-          <div key={step.id} className="flex flex-col items-center gap-2 bg-surface px-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-              currentStep >= step.id ? 'bg-primary text-white shadow-lg' : 'bg-surface-container-high text-on-surface-variant'
+      <nav className="max-w-2xl mx-auto">
+        <div className="relative flex items-start justify-between gap-1 sm:gap-2">
+          <div className="absolute left-4 right-4 top-4 h-[2px] bg-outline-variant/20"></div>
+          {steps.map((step) => (
+          <div key={step.id} className="relative z-10 flex-1 flex flex-col items-center gap-1.5 min-w-0">
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 border ${
+              currentStep >= step.id
+                ? 'bg-primary text-white border-primary shadow-sm'
+                : 'bg-surface-container-high text-on-surface-variant border-outline-variant/30'
             }`}>
-              {currentStep > step.id ? <Check className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+              {currentStep > step.id ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : <step.icon className="w-4 h-4 sm:w-5 sm:h-5" />}
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${
+            <span className={`text-[10px] leading-none text-center font-bold uppercase tracking-[0.06em] ${
               currentStep >= step.id ? 'text-primary' : 'text-on-surface-variant'
             }`}>
-              {step.label}
+              <span className="sm:hidden">
+                {step.id === 1 ? 'Details' : step.id === 2 ? 'Venue' : step.id === 3 ? 'Pricing' : 'Done'}
+              </span>
+              <span className="hidden sm:inline">{step.label}</span>
             </span>
           </div>
-        ))}
+          ))}
+        </div>
       </nav>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
         {/* Form Content (Left) */}
-        <div className="lg:col-span-7 space-y-12">
+        <div className="lg:col-span-7 space-y-6 sm:space-y-8">
           <header>
-            <h2 className="text-4xl font-headline font-extrabold tracking-tight text-primary leading-tight mb-4">
+            <div className="mb-3">
+              <img src="/api/brand/logo/2" alt="Evorca logo" className="h-14 w-auto object-contain" />
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-headline font-extrabold tracking-tight text-primary leading-tight mb-2">
               Setting the Stage.
             </h2>
-            <p className="text-on-surface-variant text-lg leading-relaxed">
+            <p className="text-on-surface-variant text-base sm:text-lg leading-relaxed">
               Define the ambiance for your guests. From the grandeur of the ballroom to the intimate details of the invitation.
             </p>
           </header>
 
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="space-y-6 prestige-card p-4 sm:p-6 rounded-2xl border border-outline-variant/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
-              <div className="space-y-8">
+              <div className="space-y-5">
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Name</label>
+                  <label className={fieldLabelClass}>Event Name</label>
                   <input 
                     type="text" 
                     placeholder="e.g. The Sapphire Corporate Gala"
                     value={formData.name}
                     onChange={(e) => updateFormData('name', e.target.value)}
-                    className="input-prestige text-2xl font-medium" 
+                    className={`${fieldClass} text-base sm:text-lg font-medium`} 
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                   <div className="flex flex-col">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Type</label>
+                    <label className={fieldLabelClass}>Event Type</label>
                     <select
                       value={formData.type}
                       onChange={(e) => updateFormData('type', e.target.value)}
-                      className="input-prestige cursor-pointer"
+                      className={`${fieldClass} cursor-pointer`}
                     >
                       <option>Corporate Summit</option>
                       <option>Wedding Reception</option>
@@ -184,30 +196,30 @@ export default function CreateEvent() {
                     </select>
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Dress Code</label>
+                    <label className={fieldLabelClass}>Dress Code</label>
                     <input
                       type="text"
                       placeholder="e.g. Black Tie"
                       value={formData.dressCode}
                       onChange={(e) => updateFormData('dressCode', e.target.value)}
-                      className="input-prestige"
+                      className={fieldClass}
                     />
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Description</label>
+                  <label className={fieldLabelClass}>Description</label>
                   <textarea 
                     rows={4} 
                     placeholder="The narrative of your event..."
                     value={formData.description}
                     onChange={(e) => updateFormData('description', e.target.value)}
-                    className="input-prestige resize-none"
+                    className={`${fieldClass} resize-none min-h-28`}
                   ></textarea>
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Poster/Image</label>
-                  <div className="border-2 border-dashed border-outline-variant/30 rounded-xl p-6 hover:border-primary/50 transition-colors cursor-pointer">
+                  <label className={fieldLabelClass}>Event Poster/Image</label>
+                  <div className="border-2 border-dashed border-outline-variant/30 rounded-xl p-4 sm:p-6 hover:border-primary/50 transition-colors cursor-pointer">
                     <input
                       type="file"
                       accept="image/*"
@@ -229,70 +241,70 @@ export default function CreateEvent() {
 
             {/* Step 2: Venue & Guest Details */}
             {currentStep === 2 && (
-              <div className="space-y-8">
+              <div className="space-y-5">
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Venue Name</label>
+                  <label className={fieldLabelClass}>Venue Name</label>
                   <input
                     type="text"
                     placeholder="e.g. The Grand Ballroom, Nairobi"
                     value={formData.venue}
                     onChange={(e) => updateFormData('venue', e.target.value)}
-                    className="input-prestige"
+                    className={fieldClass}
                   />
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Address</label>
+                  <label className={fieldLabelClass}>Address</label>
                   <textarea
                     rows={3}
                     placeholder="Full address of the venue..."
                     value={formData.address}
                     onChange={(e) => updateFormData('address', e.target.value)}
-                    className="input-prestige resize-none"
+                    className={`${fieldClass} resize-none min-h-24`}
                   ></textarea>
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">City</label>
+                  <label className={fieldLabelClass}>City</label>
                   <input
                     type="text"
                     placeholder="e.g. Nairobi"
                     value={formData.city}
                     onChange={(e) => updateFormData('city', e.target.value)}
-                    className="input-prestige"
+                    className={fieldClass}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                   <div className="flex flex-col">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Event Date</label>
+                    <label className={fieldLabelClass}>Event Date</label>
                     <input
                       type="date"
                       value={formData.date}
                       onChange={(e) => updateFormData('date', e.target.value)}
-                      className="input-prestige"
+                      className={fieldClass}
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Start Time</label>
+                    <label className={fieldLabelClass}>Start Time</label>
                     <input
                       type="time"
                       value={formData.time}
                       onChange={(e) => updateFormData('time', e.target.value)}
-                      className="input-prestige"
+                      className={fieldClass}
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Maximum Guests</label>
+                  <label className={fieldLabelClass}>Maximum Guests</label>
                   <input
                     type="number"
                     placeholder="e.g. 200"
                     min="1"
                     value={formData.maxGuests}
                     onChange={(e) => updateFormData('maxGuests', e.target.value)}
-                    className="input-prestige"
+                    className={fieldClass}
                   />
                 </div>
               </div>
@@ -300,10 +312,10 @@ export default function CreateEvent() {
 
             {/* Step 3: Pricing */}
             {currentStep === 3 && (
-              <div className="space-y-8">
-                <div className="grid grid-cols-2 gap-8">
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                   <div className="flex flex-col">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Ticket Price</label>
+                    <label className={fieldLabelClass}>Ticket Price</label>
                     <input
                       type="number"
                       placeholder="0.00"
@@ -311,15 +323,15 @@ export default function CreateEvent() {
                       step="0.01"
                       value={formData.ticketPrice}
                       onChange={(e) => updateFormData('ticketPrice', e.target.value)}
-                      className="input-prestige"
+                      className={fieldClass}
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Currency</label>
+                    <label className={fieldLabelClass}>Currency</label>
                     <select
                       value={formData.currency}
                       onChange={(e) => updateFormData('currency', e.target.value)}
-                      className="input-prestige cursor-pointer"
+                      className={`${fieldClass} cursor-pointer`}
                     >
                       <option value="USD">USD ($)</option>
                       <option value="EUR">EUR (€)</option>
@@ -329,11 +341,11 @@ export default function CreateEvent() {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Ticket Category</label>
+                  <label className={fieldLabelClass}>Ticket Category</label>
                   <select
                     value={formData.ticketType}
                     onChange={(e) => updateFormData('ticketType', e.target.value)}
-                    className="input-prestige cursor-pointer"
+                    className={`${fieldClass} cursor-pointer`}
                   >
                     <option value="General">General Admission</option>
                     <option value="VIP">VIP Pass</option>
@@ -358,8 +370,8 @@ export default function CreateEvent() {
                 <div className="space-y-6">
                   <h3 className="text-xl font-headline font-bold text-primary">Review Your Event</h3>
 
-                  <div className="space-y-4 p-6 bg-surface-container-low rounded-xl">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-4 p-5 sm:p-6 bg-surface-container-low rounded-xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="font-bold text-primary">Event:</span> {formData.name || 'Not specified'}
                       </div>
@@ -402,7 +414,7 @@ export default function CreateEvent() {
                 )}
               </div>
             )}
-            <div className="flex justify-between items-center pt-8 border-t border-outline-variant/10">
+            <div className="flex justify-between items-center pt-5 sm:pt-6 border-t border-outline-variant/10">
               <button 
                 onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
                 disabled={currentStep === 1}
@@ -416,7 +428,7 @@ export default function CreateEvent() {
               {currentStep < 4 ? (
                 <button 
                   onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-                  className="btn-prestige-primary flex items-center gap-2"
+                  className="btn-prestige-primary flex items-center gap-2 px-4 h-10 sm:h-11 rounded-lg text-sm"
                 >
                   Continue <ChevronRight className="w-4 h-4" />
                 </button>
@@ -424,7 +436,7 @@ export default function CreateEvent() {
                 <button
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="btn-prestige-primary bg-secondary from-secondary to-secondary-fixed disabled:opacity-50"
+                  className="btn-prestige-primary bg-secondary from-secondary to-secondary-fixed disabled:opacity-50 px-4 h-10 sm:h-11 rounded-lg text-sm"
                 >
                   {isLoading ? 'Creating...' : 'Curate Experience'}
                 </button>
@@ -434,8 +446,8 @@ export default function CreateEvent() {
         </div>
 
         {/* AI Sidebar (Right) */}
-        <div className="lg:col-span-5">
-          <div className="sticky top-32 prestige-card rounded-2xl overflow-hidden border border-outline-variant/10 shadow-xl shadow-primary/5">
+        <div className="lg:col-span-5 hidden lg:block">
+          <div className="lg:sticky lg:top-32 prestige-card rounded-2xl overflow-hidden border border-outline-variant/10 shadow-xl shadow-primary/5">
             <div className="bg-primary/5 p-6 flex items-center justify-between border-b border-outline-variant/5">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
