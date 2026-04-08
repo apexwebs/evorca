@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { randomBytes } from 'crypto'
+import { deriveTicketCode, normalizePhone } from '@/lib/ticketCode'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -98,15 +98,54 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Full name and phone are required' }, { status: 400 })
     }
 
-    // Generate unique ticket code
-    const ticketCode = randomBytes(8).toString('hex').toUpperCase()
+    const normalizedPhone = normalizePhone(phone)
+    const ticketCode = deriveTicketCode({ eventId, phone: normalizedPhone })
+
+    // Make invites idempotent by ticket_code (derived from eventId + normalizedPhone).
+    const { data: existingGuest, error: existingError } = await authClient
+      .from('guests')
+      .select('*')
+      .eq('event_id', eventId)
+      .eq('ticket_code', ticketCode)
+      .single()
+
+    if (existingError && existingError.code !== 'PGRST116') {
+      console.error('Existing guest check error:', existingError)
+      return NextResponse.json({ error: 'Failed to check existing guest' }, { status: 500 })
+    }
+
+    if (existingGuest) {
+      const statusToSet =
+        existingGuest.status === 'confirmed' || existingGuest.status === 'checked_in'
+          ? existingGuest.status
+          : 'invited'
+
+      const { data: updatedGuest, error: updateError } = await authClient
+        .from('guests')
+        .update({
+          full_name,
+          phone: normalizedPhone,
+          status: statusToSet,
+        })
+        .eq('id', existingGuest.id)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('Guest update error:', updateError)
+        return NextResponse.json({ error: 'Failed to invite guest' }, { status: 500 })
+      }
+
+      console.log(`Guest invited (idempotent): ${full_name} ${normalizedPhone} to ${event.title}, ticket: ${ticketCode}`)
+      return NextResponse.json({ guest: updatedGuest, message: 'Guest invited successfully', ticket_code: ticketCode })
+    }
 
     const { data: guest, error: guestError } = await authClient
       .from('guests')
       .insert({
         event_id: eventId,
-        full_name: full_name || null,
-        phone: phone || null,
+        full_name,
+        phone: normalizedPhone,
         ticket_code: ticketCode,
         status: 'invited',
       })
@@ -118,11 +157,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Failed to invite guest' }, { status: 500 })
     }
 
-    // TODO: Send email invitation with ticket code and event details
-    // For now, just log it
-    console.log(`Guest invited: ${full_name} ${phone} to ${event.title}, ticket: ${ticketCode}`)
-
-    return NextResponse.json({ guest, message: 'Guest invited successfully' })
+    console.log(`Guest invited: ${full_name} ${normalizedPhone} to ${event.title}, ticket: ${ticketCode}`)
+    return NextResponse.json({ guest, message: 'Guest invited successfully', ticket_code: ticketCode })
   } catch (err) {
     console.error('Guests POST error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

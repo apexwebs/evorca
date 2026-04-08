@@ -27,7 +27,6 @@ interface EventDetails {
 
 interface Guest {
   id: string
-  email: string
   full_name: string | null
   phone: string | null
   status: string
@@ -41,6 +40,13 @@ export default function EventDetailPage() {
   const router = useRouter()
   const eventId = params.id
 
+  // This legacy route is kept for backwards compatibility, but guest management
+  // should be handled in the canonical hub route.
+  useEffect(() => {
+    if (!eventId) return
+    router.replace(`/dashboard/events/hub/${eventId}`)
+  }, [eventId, router])
+
   const [event, setEvent] = useState<EventDetails | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -48,7 +54,7 @@ export default function EventDetailPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'guests'>('overview')
   const [guests, setGuests] = useState<Guest[]>([])
   const [guestsLoading, setGuestsLoading] = useState(false)
-  const [inviteForm, setInviteForm] = useState({ email: '', full_name: '', phone: '' })
+  const [inviteForm, setInviteForm] = useState({ full_name: '', phone: '' })
   const [inviteLoading, setInviteLoading] = useState(false)
 
   useEffect(() => {
@@ -125,7 +131,7 @@ export default function EventDetailPage() {
         return
       }
 
-      setInviteForm({ email: '', full_name: '', phone: '' })
+      setInviteForm({ full_name: '', phone: '' })
       fetchGuests() // Refresh the list
     } catch (error) {
       console.error('Invite failed:', error)
@@ -332,21 +338,7 @@ export default function EventDetailPage() {
             </h3>
 
             <form onSubmit={handleInviteGuest} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label htmlFor="invite-email" className="block text-sm font-medium mb-1">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="invite-email"
-                    value={inviteForm.email}
-                    onChange={(e) => setInviteForm(prev => ({ ...prev, email: e.target.value }))}
-                    required
-                    className="w-full px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="guest@email.com"
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="invite-name" className="block text-sm font-medium mb-1">
                     Full Name
@@ -404,7 +396,6 @@ export default function EventDetailPage() {
                   <div key={guest.id} className="flex items-center justify-between p-4 border border-outline-variant/10 rounded-lg">
                     <div className="flex-1">
                       <div className="font-medium text-on-surface">{guest.full_name || 'No name provided'}</div>
-                      <div className="text-sm text-on-surface-variant">{guest.email}</div>
                       {guest.phone && <div className="text-sm text-on-surface-variant">{guest.phone}</div>}
                       <div className="text-xs text-on-surface-variant mt-1">
                         Ticket: {guest.ticket_code} • Status: {guest.status}

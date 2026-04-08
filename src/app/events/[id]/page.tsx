@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 
 interface PublicEventDetails {
   title: string
@@ -17,11 +17,16 @@ interface PublicEventDetails {
 export default function PublicEventPage() {
   const params = useParams() as { id?: string }
   const eventId = params.id
+
+  const searchParams = useSearchParams()
+  const ticketParam = (searchParams.get('ticket') || '').trim()
+
   const [event, setEvent] = useState<PublicEventDetails | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [registrationSuccess, setRegistrationSuccess] = useState('')
+  const [ticketCode, setTicketCode] = useState('')
   const [formData, setFormData] = useState({
     full_name: '',
     phone: ''
@@ -67,7 +72,8 @@ export default function PublicEventPage() {
     setRegistrationSuccess('')
 
     try {
-      const res = await fetch(`/api/events/${eventId}/register`, {
+      const ticketQuery = ticketParam ? `?ticket=${encodeURIComponent(ticketParam)}` : ''
+      const res = await fetch(`/api/events/${eventId}/register${ticketQuery}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ full_name: formData.full_name, phone: formData.phone })
@@ -81,6 +87,7 @@ export default function PublicEventPage() {
       }
 
       setRegistrationSuccess(data.message)
+      setTicketCode(data.ticket_code || '')
       setFormData({ full_name: '', phone: '' })
     } catch (error) {
       console.error('Registration failed:', error)
@@ -92,6 +99,10 @@ export default function PublicEventPage() {
 
   if (isLoading) return <div className="py-24 text-center">Loading event details...</div>
   if (error || !event) return <div className="py-24 text-center text-error">{error || 'Event not found'}</div>
+
+  const qrSrc = ticketCode
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(ticketCode)}`
+    : ''
 
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-6">
@@ -136,7 +147,7 @@ export default function PublicEventPage() {
 
           <div>
             <label htmlFor="phone" className="block text-sm font-medium mb-1">
-              Phone Number (Optional)
+              Phone Number
             </label>
             <input
               type="tel"
@@ -144,6 +155,7 @@ export default function PublicEventPage() {
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
+              required
               className="w-full px-3 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="+254 XXX XXX XXX"
             />
@@ -157,6 +169,39 @@ export default function PublicEventPage() {
             {isSubmitting ? 'Registering...' : 'Register as Guest'}
           </button>
         </form>
+
+        {ticketCode && (
+          <div className="mt-8 space-y-4">
+            <h3 className="text-xl font-semibold text-primary">Your QR Pass</h3>
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="bg-surface-container-lowest p-4 rounded-xl">
+                {/* QR payload is the deterministic `ticket_code` string */}
+                <img src={qrSrc} alt="QR code for ticket code" width={240} height={240} />
+              </div>
+              <div className="flex-1 space-y-3">
+                <p className="text-on-surface-variant text-sm">
+                  Ticket code (for gate verification):
+                </p>
+                <div className="bg-surface-container-low rounded-xl p-3 break-all font-mono text-sm">
+                  {ticketCode}
+                </div>
+                <button
+                  type="button"
+                  className="btn-prestige-secondary"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(ticketCode)
+                    } catch {
+                      // Ignore copy failures; gate can still use QR.
+                    }
+                  }}
+                >
+                  Copy ticket code
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

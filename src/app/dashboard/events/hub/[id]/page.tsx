@@ -29,7 +29,6 @@ interface EventDetails {
 interface Guest {
   id: string
   event_id: string
-  email: string
   full_name: string | null
   phone: string | null
   status: 'invited' | 'confirmed' | 'declined' | 'checked_in'
@@ -362,10 +361,11 @@ function GuestsTab({ event }: { event: EventDetails }) {
     window.open(`https://wa.me/?text=${text}`, '_blank')
   }
 
-  const shareEmail = () => {
-    const subject = encodeURIComponent(`Invitation: ${event.title}`)
-    const body = encodeURIComponent(`You're invited to ${event.title} on ${new Date(event.date_start).toLocaleString()} at ${event.location_name}. Register here: ${eventUrl}`)
-    window.location.href = `mailto:?subject=${subject}&body=${body}`
+  const shareWhatsAppPass = (passUrl: string) => {
+    const text = encodeURIComponent(
+      `Join ${event.title} at ${event.location_name} on ${new Date(event.date_start).toLocaleString()}. Register/claim your pass here: ${passUrl}`,
+    )
+    window.open(`https://wa.me/?text=${text}`, '_blank')
   }
 
   const togglePublish = async () => {
@@ -402,9 +402,6 @@ function GuestsTab({ event }: { event: EventDetails }) {
             </button>
             <button className="btn-prestige-secondary" onClick={shareWhatsApp}>
               WhatsApp Share
-            </button>
-            <button className="btn-prestige-secondary" onClick={shareEmail}>
-              Email Invite
             </button>
           </div>
         </div>
@@ -457,29 +454,47 @@ function GuestsTab({ event }: { event: EventDetails }) {
           <p className="text-on-surface-variant">No guests invited yet. Add guests using the form above.</p>
         ) : (
           <div className="space-y-2">
-            {guests.map((guest) => (
-              <div key={guest.id} className="flex flex-col md:flex-row md:items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">{guest.full_name || 'No name'}</p>
-                  <p className="text-sm text-on-surface-variant">{guest.phone ? guest.phone : 'No phone available'}</p>
-                  <p className="text-xs text-on-surface-variant">Ticket: {guest.ticket_code}</p>
-                </div>
-                <div className="flex gap-2 mt-2 md:mt-0">
-                  {['invited', 'confirmed', 'declined', 'checked_in'].map((status) => (
+            {guests.map((guest) => {
+              const passUrl = `${eventUrl}/register?ticket=${guest.ticket_code}`
+              return (
+                <div key={guest.id} className="flex flex-col md:flex-row md:items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{guest.full_name || 'No name'}</p>
+                    <p className="text-sm text-on-surface-variant">{guest.phone ? guest.phone : 'No phone available'}</p>
+                    <p className="text-xs text-on-surface-variant">Ticket: {guest.ticket_code}</p>
+                  </div>
+                  <div className="flex gap-2 mt-2 md:mt-0 flex-wrap">
                     <button
-                      key={status}
-                      className={`text-xs px-2 py-1 rounded ${guest.status === status ? 'bg-primary text-white' : 'bg-outline-variant text-on-surface'}`}
-                      onClick={() => updateGuestStatus(guest.id, status as Guest['status'])}
+                      type="button"
+                      className="text-xs px-2 py-1 rounded bg-outline-variant text-on-surface"
+                      onClick={() => navigator.clipboard.writeText(passUrl)}
                     >
-                      {status}
+                      Copy Pass Link
                     </button>
-                  ))}
-                  <button className="text-xs px-2 py-1 rounded border border-error text-error" onClick={() => removeGuest(guest.id)}>
-                    Remove
-                  </button>
+                    <button
+                      type="button"
+                      className="text-xs px-2 py-1 rounded bg-outline-variant text-on-surface"
+                      onClick={() => shareWhatsAppPass(passUrl)}
+                    >
+                      WhatsApp
+                    </button>
+
+                    {['invited', 'confirmed', 'declined', 'checked_in'].map((status) => (
+                      <button
+                        key={status}
+                        className={`text-xs px-2 py-1 rounded ${guest.status === status ? 'bg-primary text-white' : 'bg-outline-variant text-on-surface'}`}
+                        onClick={() => updateGuestStatus(guest.id, status as Guest['status'])}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                    <button className="text-xs px-2 py-1 rounded border border-error text-error" onClick={() => removeGuest(guest.id)}>
+                      Remove
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

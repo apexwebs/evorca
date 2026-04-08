@@ -5,19 +5,28 @@ import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: eventId } = await params
+    const serviceClient = createServiceRoleClient()
     const authClient = await createClient()
 
-    if (!authClient) {
+    // Determine current user if logged in (optional)
+    let userId: string | null = null
+    if (authClient) {
+      try {
+        const { data: { user } } = await authClient.auth.getUser()
+        userId = user?.id ?? null
+      } catch {
+        userId = null
+      }
+    }
+
+    const queryClient = serviceClient ?? authClient
+
+    if (!queryClient) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
     }
 
-    const { data: { user }, error: userError } = await authClient.auth.getUser()
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-
-    // First try to fetch and validate ownership/public access
-    const { data: event, error } = await authClient
+    // Fetch and validate ownership/public access
+    const { data: event, error } = await queryClient
       .from('events')
       .select('*')
       .eq('id', eventId)
@@ -36,8 +45,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const isOwned = user ? event.created_by === user.id : false
-    const isPublic = event.is_public === true
+    const isOwned = userId ? event.created_by === userId : false
+    // Public reads are allowed only for published + is_public events.
+    const isPublic = event.status === 'published' && event.is_public === true
 
     if (!isOwned && !isPublic) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })

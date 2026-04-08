@@ -53,7 +53,6 @@ CREATE TABLE IF NOT EXISTS public.events (
 CREATE TABLE IF NOT EXISTS public.guests (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
   full_name TEXT,
   phone TEXT,
   status TEXT DEFAULT 'invited' CHECK (status IN ('invited', 'confirmed', 'declined', 'checked_in')),
@@ -64,6 +63,9 @@ CREATE TABLE IF NOT EXISTS public.guests (
   checked_in_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- If guests table existed from an older version, ensure the legacy email column is removed.
+ALTER TABLE public.guests DROP COLUMN IF EXISTS email;
 
 -- ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
