@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface PublicEventDetails {
   title: string
@@ -27,6 +28,9 @@ export default function PublicEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [registrationSuccess, setRegistrationSuccess] = useState('')
   const [ticketCode, setTicketCode] = useState('')
+  const [checkinResult, setCheckinResult] = useState('')
+  const [checkinError, setCheckinError] = useState('')
+  const [isCheckingIn, setIsCheckingIn] = useState(false)
   const [formData, setFormData] = useState({
     full_name: '',
     phone: ''
@@ -70,6 +74,8 @@ export default function PublicEventPage() {
     setIsSubmitting(true)
     setError('')
     setRegistrationSuccess('')
+    setCheckinResult('')
+    setCheckinError('')
 
     try {
       const ticketQuery = ticketParam ? `?ticket=${encodeURIComponent(ticketParam)}` : ''
@@ -97,12 +103,37 @@ export default function PublicEventPage() {
     }
   }
 
+  const handleManualCheckin = async () => {
+    if (!eventId || !ticketCode) return
+
+    setIsCheckingIn(true)
+    setCheckinResult('')
+    setCheckinError('')
+
+    try {
+      const res = await fetch(`/api/events/${eventId}/checkin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_code: ticketCode }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setCheckinError(data.error || 'Manual check-in failed')
+        return
+      }
+
+      setCheckinResult(data.message || 'Checked in successfully')
+    } catch (err) {
+      console.error('Manual check-in failed:', err)
+      setCheckinError('Network error while checking in')
+    } finally {
+      setIsCheckingIn(false)
+    }
+  }
+
   if (isLoading) return <div className="py-24 text-center">Loading event details...</div>
   if (error || !event) return <div className="py-24 text-center text-error">{error || 'Event not found'}</div>
-
-  const qrSrc = ticketCode
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(ticketCode)}`
-    : ''
 
   return (
     <div className="min-h-screen bg-surface">
@@ -181,31 +212,48 @@ export default function PublicEventPage() {
             <h3 className="text-xl font-semibold text-primary">Your QR Pass</h3>
             <div className="flex flex-col md:flex-row gap-6 items-start">
               <div className="bg-surface-container-lowest p-4 rounded-xl">
-                {/* QR payload is the deterministic `ticket_code` string */}
-                <img src={qrSrc} alt="QR code for ticket code" width={240} height={240} />
+                <QRCodeSVG value={ticketCode} size={240} level="H" bgColor="#ffffff" fgColor="#0f172a" />
               </div>
               <div className="flex-1 space-y-3">
-                <p className="text-on-surface-variant text-sm">
-                  Ticket code (for gate verification):
-                </p>
+                <p className="text-on-surface-variant text-sm">Ticket code (for gate verification):</p>
                 <div className="bg-surface-container-low rounded-xl p-3 break-all font-mono text-sm">
                   {ticketCode}
                 </div>
-                <button
-                  type="button"
-                  className="btn-prestige-secondary"
-                  onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(ticketCode)
-                    } catch {
-                      // Ignore copy failures; gate can still use QR.
-                    }
-                  }}
-                >
-                  Copy ticket code
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    className="btn-prestige-secondary"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(ticketCode)
+                      } catch {
+                        // Ignore copy failures; gate can still use QR.
+                      }
+                    }}
+                  >
+                    Copy ticket code
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-prestige-primary"
+                    onClick={handleManualCheckin}
+                    disabled={isCheckingIn}
+                  >
+                    {isCheckingIn ? 'Checking in…' : 'Manual check-in'}
+                  </button>
+                </div>
               </div>
             </div>
+            {checkinResult && (
+              <div className="bg-success/10 border border-success text-success p-4 rounded-lg">
+                {checkinResult}
+              </div>
+            )}
+            {checkinError && (
+              <div className="bg-error/10 border border-error text-error p-4 rounded-lg">
+                {checkinError}
+              </div>
+            )}
           </div>
         )}
         </section>

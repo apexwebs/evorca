@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/contexts/AuthContext";
 import BottomNav from "@/components/BottomNav";
 import { ReactNode } from "react";
@@ -41,6 +42,7 @@ export default function RootLayout({
           <div className="pb-24">
             {children}
             <BottomNav />
+            <Toaster position="top-right" />
           </div>
         </AuthProvider>
       </body>

@@ -4,6 +4,8 @@ import AdaptiveImage from '@/components/AdaptiveImage'
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import { QRCodeSVG } from 'qrcode.react'
+import { toast } from 'react-hot-toast'
 import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine } from 'lucide-react'
 import EventEditForm from '@/components/EventEditForm'
 
@@ -348,6 +350,8 @@ function GuestsTab({ event }: { event: EventDetails }) {
 
   useEffect(() => {
     fetchGuests()
+    const interval = window.setInterval(fetchGuests, 10000)
+    return () => window.clearInterval(interval)
   }, [fetchGuests])
 
   const handleInvite = async (e: React.FormEvent) => {
@@ -398,12 +402,15 @@ function GuestsTab({ event }: { event: EventDetails }) {
       }
 
       setActionMessage(data.message || 'Guest added successfully.')
+      toast.success(data.message || 'Guest added successfully.')
       setInviteForm({ full_name: '', phone: '' })
       setBulkInput('')
       fetchGuests()
     } catch (err) {
       console.error('Invite failed:', err)
-      setActionMessage((err as Error).message || 'Failed to add guest')
+      const message = (err as Error).message || 'Failed to add guest'
+      setActionMessage(message)
+      toast.error(message)
     } finally {
       setInviteLoading(false)
     }
@@ -424,10 +431,13 @@ function GuestsTab({ event }: { event: EventDetails }) {
       }
 
       setActionMessage(`Guest updated: ${status}`)
+      toast.success(`Guest updated: ${status}`)
       fetchGuests()
     } catch (err) {
       console.error('Update guest status failed:', err)
-      setActionMessage((err as Error).message || 'Failed to update guest status')
+      const message = (err as Error).message || 'Failed to update guest status'
+      setActionMessage(message)
+      toast.error(message)
     }
   }
 
@@ -447,10 +457,13 @@ function GuestsTab({ event }: { event: EventDetails }) {
       }
 
       setActionMessage('Guest removed successfully')
+      toast.success('Guest removed successfully')
       fetchGuests()
     } catch (err) {
       console.error('Remove guest failed:', err)
-      setActionMessage((err as Error).message || 'Could not remove guest')
+      const message = (err as Error).message || 'Could not remove guest'
+      setActionMessage(message)
+      toast.error(message)
     }
   }
 
@@ -577,6 +590,9 @@ function GuestsTab({ event }: { event: EventDetails }) {
                     <p className="font-medium text-primary">{guest.full_name || 'No name'}</p>
                     <p className="text-sm text-on-surface-variant">{guest.phone ? guest.phone : 'No phone available'}</p>
                     <p className="text-xs text-on-surface-variant mt-1">Ticket: {guest.ticket_code}</p>
+                    <div className="mt-3">
+                      <QRCodeSVG value={passUrl} size={96} level="H" bgColor="#ffffff" fgColor="#0f172a" />
+                    </div>
                   </div>
                   <div className="flex gap-2 mt-2 md:mt-0 flex-wrap">
                     <button

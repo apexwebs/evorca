@@ -1,8 +1,8 @@
 # Evorca App Fix Progress Tracker
 
 ## App Phase Progress
-- **Current Phase:** MVP Development (Early Stage)
-- **Target Phase:** Functional MVP with Auth & CRUD
+- **Current Phase:** MVP Development (Phase 1: Guest Pass & Scan Workflow)
+- **Target Phase:** Functional MVP with Auth, Guest QR Pass, and Gate Check-in
 - **Completion:** 95%  → Registration added, expanded event wizard, image upload ready
 
 ## Critical Fixes (Must Complete First)
@@ -35,6 +35,8 @@
 - [x] **INVITE-001**: Organizer share/invite flow (copy link, WA, email) now functional
 - [x] **PUBLIC-001**: Public event registration page now supports Name + Phone only (no email), and endpoint updated
 - [x] **ROUTE-001**: Avoid “View Public Page -> Dashboard”的 mis-redirect by fixing links and APIs
+- [ ] **PASS-001**: Guest QR pass UI and manual check-in fallback
+- [ ] **SCAN-001**: Event Hub Scan tab polish and guest refresh polling
 
 ## Completed Fixes
 - [x] **ANALYSIS-001**: Comprehensive codebase analysis completed (37 issues identified)

@@ -1,8 +1,10 @@
 # EVORCA PRESTIGE - PROJECT FLOW ALIGNMENT & ROADMAP
 
 **Date:** March 30, 2026  
-**Status:** MVP Foundation Laid | Critical Features Missing  
+**Status:** MVP Foundation Laid | Phase 1 Implementation Underway  
 **Analysis:** Current State vs. Desired Flow
+
+**Note:** Phase 1 now focuses on Guest QR pass flow, Event Hub scan integration, and manual check-in fallback within the current hub tab.
 
 ---
 
