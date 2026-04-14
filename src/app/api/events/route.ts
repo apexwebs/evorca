@@ -28,10 +28,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const eventDateTime = new Date(`${date}T${time}`)
+    /**
+     * Parsing date/time robustly.
+     * We expect 'date' (YYYY-MM-DD) and 'time' (HH:mm) from the form.
+     */
+    const eventDateTime = new Date(`${date}T${time}:00`)
     if (isNaN(eventDateTime.getTime())) {
       return NextResponse.json(
-        { error: 'Invalid date or time' },
+        { error: 'Invalid date or time format. Please use YYYY-MM-DD and HH:mm.' },
         { status: 400 }
       )
     }
@@ -131,6 +135,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    /**
+     * Canonical Pricing:
+     * We store the flat values in ticket_price/currency and keep the JSONB for 
+     * future complex structures (like multiple tiers), but ensure they stay in sync.
+     */
+    const priceValue = ticketPrice ? parseFloat(ticketPrice) : null
     const { data: event, error: eventError } = await supabase
       .from('events')
       .insert({
@@ -146,13 +156,13 @@ export async function POST(request: NextRequest) {
         is_public: isPublic,
         event_type: type,
         dress_code: dressCode,
-        ticket_price: ticketPrice ? parseFloat(ticketPrice) : null,
+        ticket_price: priceValue,
         currency: currency || 'KES',
         ticket_type: ticketType,
         pricing: {
-          ticketPrice: ticketPrice ? parseFloat(ticketPrice) : 0,
+          base_price: priceValue,
           currency: currency || 'KES',
-          ticketType: ticketType || 'General',
+          type: ticketType || 'General',
         },
         poster_url: posterUrl,
       })

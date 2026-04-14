@@ -5,10 +5,35 @@ import { deriveTicketCode, normalizePhone } from '@/lib/ticketCode'
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: eventId } = await params
-    const authClient = await createClient()
+    const ticketParam = request.nextUrl.searchParams.get('ticket')?.toUpperCase()
 
-    if (!authClient) {
+    const authClient = await createClient()
+    const serviceClient = createServiceRoleClient()
+    const dbClient = serviceClient ?? authClient
+
+    if (!dbClient) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
+    }
+
+    // Public single-guest lookup by ticket code
+    if (ticketParam) {
+      const { data: guest, error: guestError } = await dbClient
+        .from('guests')
+        .select('id, full_name, phone, status, ticket_code, event_id')
+        .eq('event_id', eventId)
+        .eq('ticket_code', ticketParam)
+        .single()
+
+      if (guestError || !guest) {
+        return NextResponse.json({ error: 'Guest or ticket not found' }, { status: 404 })
+      }
+
+      return NextResponse.json({ guest })
+    }
+
+    // Restricted full-list access
+    if (!authClient) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
     const { data: { user }, error: userError } = await authClient.auth.getUser()
@@ -41,10 +66,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     if (!isOwner && !isOrgOwner) {
-      if (!event.is_public) {
-        return NextResponse.json({ error: 'Access denied to guest list' }, { status: 403 })
-      }
-      // If public event, proceed but only if authentication is not available.
+      return NextResponse.json({ error: 'Access denied to guest list' }, { status: 403 })
     }
 
     const { data: guests, error: guestsError } = await authClient

@@ -39,9 +39,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${manrope.variable} antialiased`}>
         <AuthProvider>
-          <div className="pb-24">
+          <div>
             {children}
-            <BottomNav />
             <Toaster position="top-right" />
           </div>
         </AuthProvider>

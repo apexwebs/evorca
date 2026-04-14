@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { PostgrestError } from '@supabase/supabase-js'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 
+/**
+ * SECURITY WARNING: 
+ * This check-in endpoint is currently UNAUTHENTICATED. 
+ * Any guest with a valid ticket_code can mark themselves as checked_in.
+ * 
+ * SUGGESTION:
+ * 1. Implement authentication using createClient() from Supabase.
+ * 2. Verify that the authenticated user is either the event creator (created_by) 
+ *    or has a 'gate_staff' role for this event/organisation.
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,9 +25,31 @@ export async function POST(
       return NextResponse.json({ error: 'ticket_code is required' }, { status: 400 })
     }
 
+    const authClient = await createClient()
     const serviceClient = createServiceRoleClient()
-    if (!serviceClient) {
+    
+    if (!authClient || !serviceClient) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
+    }
+
+    const { data: { user }, error: userError } = await authClient.auth.getUser()
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
+    // Security Check: Does the user own this event?
+    const { data: event, error: eventError } = await authClient
+      .from('events')
+      .select('id, created_by')
+      .eq('id', eventId)
+      .single()
+
+    if (eventError || !event) {
+      return NextResponse.json({ error: 'Event not found or access denied' }, { status: 404 })
+    }
+
+    if (event.created_by !== user.id) {
+      return NextResponse.json({ error: 'You are not authorized to check in guests for this event' }, { status: 403 })
     }
 
     const { data: guest, error: guestError } = await serviceClient
