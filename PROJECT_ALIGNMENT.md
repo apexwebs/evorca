@@ -181,42 +181,35 @@
 
 ## 🚀 PRIORITY ROADMAP
 
-### **PHASE 1 - UNBLOCK ORGANIZERS (Next 24-48 hours)**
-**Goal:** Organizers can create, view, edit, and share events
+### **PHASE 1 - UNBLOCK ORGANIZERS & UI REFINE (Completed/Active)**
+**Goal:** Organizers can create, view, edit, and share events. Guest registration & basic check-in works. UI refined globally with Claymorphism.
 
-- [ ] **1.1** Fix dashboard to display event list with cards
-- [ ] **1.2** Create event detail page (`/dashboard/events/[id]`)
-- [ ] **1.3** Add event edit page (`/dashboard/events/[id]/edit`)
-- [ ] **1.4** Add event delete button with confirmation
-- [ ] **1.5** Add event status badge (draft/published/cancelled)
-- [ ] **1.6** Create shareable event link
-- [ ] **1.7** Add download event details (PDF)
+- [x] **1.1** Fix dashboard to display event list with cards
+- [x] **1.2** Create event detail page (`/dashboard/events/[id]`)
+- [x] **1.3** Add event edit page (`/dashboard/events/[id]/edit`)
+- [x] **1.4** Add event delete button with confirmation
+- [x] **1.5** Add event status badge (draft/published/cancelled)
+- [x] **1.6** Create shareable event link
+- [x] **1.7** QR code generation & storage (per guest) via phone (No-Email Rule)
+- [x] **1.8** Guest self-registration and gate scanner (Event Creator only)
+- [ ] **1.9** UI/UX Global Refine (Claymorphism, Skeletons, Drawers)
+- [ ] **1.10** Code Cleanup (remove deprecated routes)
 
-### **PHASE 2 - ENABLE GUEST PATHS (Next 48-72 hours)**
-**Goal:** Either path (A or B) can work
+### **PHASE 2 - ADVANCED GUEST & GATE MANAGEMENT (Next)**
+**Goal:** Full robust ecosystem for paths, reminders, and advanced validation.
 
-- [ ] **2.1** Add "Guest Invitation" form (choose path A or B)
-- [ ] **2.2** For Path B: Build CSV upload or manual guest entry
-- [ ] **2.3** For Path B: Email invitation template & delivery
-- [ ] **2.4** For Path A: Create public registration form
-- [ ] **2.5** QR code generation & storage (per guest)
-- [ ] **2.6** Guest can download/receive their QR code
+- [ ] **2.1** Gate staff RBAC (Role-Based Access) so non-creators can scan codes
+- [ ] **2.2** Ticketing & Payments Gateway (M-Pesa / Stripe for Path A)
+- [ ] **2.3** Add "Guest Invitation" form improvements (Bulk CSV upload)
+- [ ] **2.4** SMS Reminders (Africa's Talking integration) day-before event
+- [ ] **2.5** Add download event details (PDF export for organizer)
+- [ ] **2.6** Handle no-shows, refunds, etc.
 
-### **PHASE 3 - GATE & VERIFICATION (Following week)**
-**Goal:** Gate staff can verify guests; organizers see analytics
+### **PHASE 3 - POLISH & ANALYTICS (Future)**
+**Goal:** Rich dashboards and ecosystem polish.
 
-- [ ] **3.1** Scanner app (mobile-friendly)
-- [ ] **3.2** Check-in tracking (scanned_at field)
-- [ ] **3.3** Real-time analytics dashboard
-- [ ] **3.4** Guest attendance reports
-
-### **PHASE 4 - POLISH (Following week)**
-**Goal:** Reminders, edge cases, UX polish
-
-- [ ] **4.1** Event reminders (24hr before)
-- [ ] **4.2** Guest reminder emails
-- [ ] **4.3** RSVP notifications
-- [ ] **4.4** Handle no-shows, refunds, etc.
+- [ ] **3.1** Real-time analytics dashboard improvements
+- [ ] **3.2** Complete Guest attendance reports export
 
 ---
 

@@ -13,11 +13,11 @@ export default function AuthLayout({
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
         
         <div className="relative z-10 max-w-md text-center">
-          <div className="inline-block bg-white/10 backdrop-blur-xl p-4 rounded-3xl mb-8 border border-white/20">
+          <div className="inline-flex items-center justify-center mb-8 drop-shadow-2xl">
             <img
               src="/api/brand/logo/2"
               alt="Evorca logo"
-              className="w-28 h-28 object-contain"
+              className="h-64 w-auto object-contain transform scale-110"
             />
           </div>
           <h1 className="text-display-lg text-6xl font-headline font-extrabold italic text-white mb-4 leading-tight">
@@ -37,11 +37,11 @@ export default function AuthLayout({
       {/* Auth Content Side (Right) */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-10">
         <div className="w-full max-w-[440px] animate-in fade-in slide-in-from-right-4 duration-700">
-          <div className="mb-5 flex justify-center">
+          <div className="mb-8 flex justify-center">
             <img
               src="/api/brand/logo/1"
               alt="Evorca logo"
-              className="h-12 w-auto object-contain"
+              className="h-24 w-auto object-contain drop-shadow-sm transform scale-110"
             />
           </div>
           {children}

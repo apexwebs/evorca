@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { CardSkeleton } from '@/components/ui/Skeleton'
 
 type GuestItem = {
   id: string
@@ -90,102 +91,134 @@ export default function GuestsPage() {
   }, [guests])
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-5 sm:space-y-7">
-      <div>
-        <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold text-primary mb-2">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6 sm:space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-display-md text-4xl sm:text-5xl font-headline font-extrabold text-primary mb-2 tracking-tight">
           Guests Management
         </h1>
-        <p className="text-on-surface-variant text-base sm:text-lg">
-          Manage your guests across all events. View RSVPs, track check-ins, and send invitations.
+        <p className="text-on-surface-variant text-base sm:text-lg leading-relaxed max-w-2xl">
+          Manage your guests systematically. View RSVPs, track real-time check-ins, and override access states.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Stat Cards */}
-        <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
-          <p className="text-xs font-bold uppercase text-on-surface-variant mb-2">Total Guests</p>
-          <p className="text-3xl font-headline font-bold text-primary">{stats.total}</p>
+        <div className="clay-card p-6 min-h-[100px] flex flex-col justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70 mb-2">Total Guests</p>
+          <p className="text-4xl font-headline font-extrabold text-primary">{stats.total}</p>
         </div>
-        <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
-          <p className="text-xs font-bold uppercase text-on-surface-variant mb-2">Confirmed RSVPs</p>
-          <p className="text-3xl font-headline font-bold text-secondary">{stats.confirmed}</p>
+        <div className="clay-card p-6 min-h-[100px] flex flex-col justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70 mb-2">Confirmed RSVPs</p>
+          <p className="text-4xl font-headline font-extrabold text-secondary">{stats.confirmed}</p>
         </div>
-        <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
-          <p className="text-xs font-bold uppercase text-on-surface-variant mb-2">Check-ins Today</p>
-          <p className="text-3xl font-headline font-bold text-primary">{stats.checkedIn}</p>
+        <div className="clay-card p-6 min-h-[100px] flex flex-col justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70 mb-2">Check-ins Today</p>
+          <p className="text-4xl font-headline font-extrabold text-primary">{stats.checkedIn}</p>
         </div>
       </div>
 
-      <div className="prestige-card p-6 rounded-xl border border-outline-variant/5">
-        {actionMessage && <p className="text-xs text-on-surface-variant mb-3">{actionMessage}</p>}
+      <div className="clay-card p-6 sm:p-8">
+        {actionMessage && (
+          <div className="mb-6 p-4 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest rounded-xl border border-primary/20 text-center">
+            {actionMessage}
+          </div>
+        )}
         {loading ? (
-          <p className="text-on-surface-variant">Loading guests...</p>
+          <div className="space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
         ) : error ? (
           <p className="text-error">{error}</p>
         ) : guests.length === 0 ? (
-          <p className="text-on-surface-variant">No guests yet. Add guests from your event hub.</p>
+          <div className="text-center py-12">
+            <p className="text-on-surface-variant font-bold uppercase tracking-widest text-xs">No guests yet. Add guests from your event hub.</p>
+          </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-4">
             {guests.map((guest) => (
-              <div key={guest.id} className="p-3.5 sm:p-4 rounded-xl border border-outline-variant/10 bg-surface-container-low">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={guest.full_name || ''}
-                    onChange={(e) =>
-                      setGuests((prev) =>
-                        prev.map((item) => (item.id === guest.id ? { ...item, full_name: e.target.value } : item)),
-                      )
-                    }
-                  />
-                  <input
-                    type="tel"
-                    className="form-input"
-                    value={guest.phone || ''}
-                    onChange={(e) =>
-                      setGuests((prev) =>
-                        prev.map((item) => (item.id === guest.id ? { ...item, phone: e.target.value } : item)),
-                      )
-                    }
-                  />
-                  <select
-                    className="form-input"
-                    value={guest.status}
-                    onChange={(e) =>
-                      setGuests((prev) =>
-                        prev.map((item) =>
-                          item.id === guest.id ? { ...item, status: e.target.value as GuestItem['status'] } : item,
-                        ),
-                      )
-                    }
-                  >
-                    {allowedStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
+              <div key={guest.id} className="p-5 sm:p-6 rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest transition-all hover:border-primary/20 hover:shadow-md">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary ml-2">Full Name</label>
+                    <input
+                      type="text"
+                      className="clay-input w-full text-sm font-sans"
+                      value={guest.full_name || ''}
+                      onChange={(e) =>
+                        setGuests((prev) =>
+                          prev.map((item) => (item.id === guest.id ? { ...item, full_name: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary ml-2">Phone</label>
+                    <input
+                      type="tel"
+                      className="clay-input w-full text-sm font-mono tracking-widest"
+                      value={guest.phone || ''}
+                      onChange={(e) =>
+                        setGuests((prev) =>
+                          prev.map((item) => (item.id === guest.id ? { ...item, phone: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary ml-2">Clearance Status</label>
+                    <select
+                      className="clay-input w-full text-sm font-bold uppercase tracking-widest"
+                      value={guest.status}
+                      onChange={(e) =>
+                        setGuests((prev) =>
+                          prev.map((item) =>
+                            item.id === guest.id ? { ...item, status: e.target.value as GuestItem['status'] } : item,
+                          ),
+                        )
+                      }
+                    >
+                      {allowedStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <p className="text-xs text-on-surface-variant">Ticket: {guest.ticket_code || '-'}</p>
-                <p className="text-xs text-on-surface-variant mt-1">
-                  Event: {guest.event?.title || 'Unknown event'}
-                </p>
-                <div className="mt-2.5">
-                  <button
-                    type="button"
-                    className="btn-prestige-primary text-xs h-10 px-4 rounded-lg"
-                    disabled={savingGuestId === guest.id}
-                    onClick={() =>
-                      updateGuest(guest, {
-                        full_name: guest.full_name,
-                        phone: guest.phone,
-                        status: guest.status,
-                      })
-                    }
-                  >
-                    {savingGuestId === guest.id ? 'Saving...' : 'Save Changes'}
-                  </button>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-outline-variant/10">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-on-surface-variant w-16">Ticket:</span>
+                      <span className="text-xs font-mono font-bold tracking-[0.2em] text-primary bg-primary/5 px-2 py-1 rounded-md">{guest.ticket_code || '-'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-on-surface-variant w-16">Event:</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-on-surface">{guest.event?.title || 'Unknown event'}</span>
+                    </div>
+                  </div>
+                  <div className="shrink-0 flex justify-end">
+                    <button
+                      type="button"
+                      className="clay-btn-primary text-xs h-12 px-8 shadow-sm flex items-center justify-center gap-2"
+                      disabled={savingGuestId === guest.id}
+                      onClick={() =>
+                        updateGuest(guest, {
+                          full_name: guest.full_name,
+                          phone: guest.phone,
+                          status: guest.status,
+                        })
+                      }
+                    >
+                      {savingGuestId === guest.id ? (
+                         <>
+                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                           Commiting...
+                         </>
+                      ) : 'Save Updates'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

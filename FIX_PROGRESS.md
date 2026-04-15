@@ -15,10 +15,10 @@
 - [x] **AUTH-002**: Implement authentication state management (Context/User provider)
 
 ## High-Priority Fixes
-- [ ] **EVT-UPLOAD**: Image/poster upload for events
+- [x] **EVT-UPLOAD**: Image/poster upload for events
 - [ ] **EVT-TYPES**: Expanded event type options (12 types)
 - [ ] **EVT-CONTEXT**: Enhanced venue, guest, ticket type options
-- [ ] **EVT-CREATE**: Event creation actually saves to database
+- [x] **EVT-CREATE**: Event creation actually saves to database
 - [x] **DB-001**: Complete RLS policies in Supabase schema
 - [x] **DATA-001**: Connect dashboard to real database data
 - [ ] **NAV-001**: Full navigation structure with proper context
@@ -31,12 +31,19 @@
 - [ ] **DB-002**: Add missing database constraints and indexes
 - [ ] **UI-001**: Break down large components into smaller ones
 - [ ] **ERR-001**: Add error boundaries and error handling
-- [x] **FEAT-001**: Implement guest management UI (incomplete UX; further polish in progress)
-- [x] **INVITE-001**: Organizer share/invite flow (copy link, WA, email) now functional
-- [x] **PUBLIC-001**: Public event registration page now supports Name + Phone only (no email), and endpoint updated
-- [x] **ROUTE-001**: Avoid “View Public Page -> Dashboard”的 mis-redirect by fixing links and APIs
-- [ ] **PASS-001**: Guest QR pass UI and manual check-in fallback
-- [ ] **SCAN-001**: Event Hub Scan tab polish and guest refresh polling
+- [x] **FEAT-001**: Implement guest management UI
+- [x] **INVITE-001**: Organizer share/invite flow (copy link, WA) now functional
+- [x] **PUBLIC-001**: Public event registration page supports Name + Phone
+- [x] **ROUTE-001**: Avoid “View Public Page -> Dashboard” mis-redirect
+- [x] **PASS-001**: Guest QR pass UI and manual check-in fallback
+- [x] **SCAN-001**: Event Hub Scan tab polish 
+
+## UI/UX Phase 1 Refine (Claymorphism Edition)
+- [ ] **UI-REF-001**: Apply Teal + Gold Claymorphism system-wide
+- [ ] **UI-REF-002**: Install Saira Stencil font
+- [ ] **UI-REF-003**: Transform Hub Event Dashboard layout with Drawers & Skeletons
+- [ ] **UI-REF-004**: Refine Guest Public View and QR pass into Claymorphism style
+- [ ] **UI-REF-005**: Clean up duplicate/deprecated routes
 
 ## Completed Fixes
 - [x] **ANALYSIS-001**: Comprehensive codebase analysis completed (37 issues identified)

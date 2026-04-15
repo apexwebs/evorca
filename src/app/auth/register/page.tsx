@@ -56,14 +56,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="space-y-8 prestige-card rounded-2xl border border-outline-variant/10 p-6 sm:p-8 bg-surface-container/40">
+    <div className="w-full max-w-md mx-auto">
+      <div className="space-y-8 clay-card rounded-[2rem] p-8 sm:p-10">
       {/* Header Section */}
       <header className="space-y-4">
         <h2 className="text-display-md text-4xl font-headline font-extrabold tracking-tight text-primary">
           Join Evorca Prestige.
         </h2>
         <p className="text-on-surface-variant text-lg font-body leading-relaxed">
-          Create your account to access the premier stage for East African event guest management.
+          Create your account to access the premier operational stage.
         </p>
       </header>
 
@@ -84,11 +85,11 @@ export default function RegisterPage() {
       {/* Registration Form */}
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex flex-col group">
-          <label htmlFor="fullName" className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1 group-focus-within:text-secondary-fixed transition-colors">
+          <label htmlFor="fullName" className="text-sm font-semibold text-primary/90 mb-2 transition-colors">
             Full Name
           </label>
-          <div className="flex items-center gap-3 border-b-2 border-outline-variant/15 group-focus-within:border-primary transition-all pb-2">
-            <User className="w-5 h-5 text-on-surface-variant/40" />
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant/40 group-focus-within:text-primary transition-colors" />
             <input
               id="fullName"
               type="text"
@@ -96,35 +97,35 @@ export default function RegisterPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="flex-1 bg-transparent border-0 focus:ring-0 p-0 text-lg font-medium placeholder:text-on-surface-variant/30"
+              className="clay-input w-full pl-12 h-14 text-sm font-medium"
             />
           </div>
         </div>
 
         <div className="flex flex-col group">
-          <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1 group-focus-within:text-secondary-fixed transition-colors">
-            Email Identity
+          <label htmlFor="email" className="text-sm font-semibold text-primary/90 mb-2 transition-colors">
+            Email Address
           </label>
-          <div className="flex items-center gap-3 border-b-2 border-outline-variant/15 group-focus-within:border-primary transition-all pb-2">
-            <Mail className="w-5 h-5 text-on-surface-variant/40" />
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant/40 group-focus-within:text-primary transition-colors" />
             <input
               id="email"
               type="email"
-              placeholder="e.g. curator@apexwebs.com"
+              placeholder="e.g. curator@evorca.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="flex-1 bg-transparent border-0 focus:ring-0 p-0 text-lg font-medium placeholder:text-on-surface-variant/30"
+              className="clay-input w-full pl-12 h-14 text-sm font-medium"
             />
           </div>
         </div>
 
         <div className="flex flex-col group">
-          <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1 group-focus-within:text-secondary-fixed transition-colors">
-            Access Token
+          <label htmlFor="password" className="text-sm font-semibold text-primary/90 mb-2 transition-colors">
+            Password Phrase
           </label>
-          <div className="flex items-center gap-3 border-b-2 border-outline-variant/15 group-focus-within:border-primary transition-all pb-2">
-            <Lock className="w-5 h-5 text-on-surface-variant/40" />
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant/40 group-focus-within:text-primary transition-colors" />
             <input
               id="password"
               type="password"
@@ -132,17 +133,17 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="flex-1 bg-transparent border-0 focus:ring-0 p-0 text-lg font-medium placeholder:text-on-surface-variant/30"
+              className="clay-input w-full pl-12 h-14 text-sm tracking-[0.2em]"
             />
           </div>
         </div>
 
         <div className="flex flex-col group">
-          <label htmlFor="passwordConfirm" className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1 group-focus-within:text-secondary-fixed transition-colors">
-            Confirm Token
+          <label htmlFor="passwordConfirm" className="text-sm font-semibold text-primary/90 mb-2 transition-colors">
+            Confirm Password Phrase
           </label>
-          <div className="flex items-center gap-3 border-b-2 border-outline-variant/15 group-focus-within:border-primary transition-all pb-2">
-            <Lock className="w-5 h-5 text-on-surface-variant/40" />
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant/40 group-focus-within:text-primary transition-colors" />
             <input
               id="passwordConfirm"
               type="password"
@@ -150,7 +151,7 @@ export default function RegisterPage() {
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
               required
-              className="flex-1 bg-transparent border-0 focus:ring-0 p-0 text-lg font-medium placeholder:text-on-surface-variant/30"
+              className="clay-input w-full pl-12 h-14 text-sm tracking-[0.2em]"
             />
           </div>
         </div>
@@ -158,22 +159,35 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full btn-prestige-primary flex items-center justify-center gap-3 py-4 shadow-xl shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="clay-btn-primary w-full flex items-center justify-center gap-3 h-14 shadow-md text-xs tracking-widest rounded-2xl group relative overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Creating Account...' : 'Join The Prestige'} <ArrowRight className="w-5 h-5" />
+          {isLoading ? (
+            <>
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Initializing...</span>
+            </>
+          ) : (
+            <>
+              <span>Join The Prestige</span> 
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
         </button>
       </form>
 
       {/* Footer Branding */}
-      <footer className="pt-6 text-center space-y-3">
+      <footer className="pt-6 text-center space-y-4">
         <p className="text-on-surface-variant text-sm font-body">
           Already part of the curation?{' '}
-          <Link href="/auth/login" className="text-primary font-bold hover:text-secondary transition-all">
+          <Link href="/auth/login" className="text-primary font-bold hover:text-secondary underline decoration-primary/30 underline-offset-4 transition-all">
             Enter The Prestige
           </Link>
         </p>
-        <p className="text-[11px] uppercase tracking-widest text-on-surface-variant/60">Registration creates your organiser profile</p>
+        <div className="inline-flex items-center justify-center bg-primary/5 px-5 py-2 rounded-full border border-primary/10 transition-colors hover:bg-primary/10">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Supported by Apexwebs</p>
+        </div>
       </footer>
+    </div>
     </div>
   )
 }

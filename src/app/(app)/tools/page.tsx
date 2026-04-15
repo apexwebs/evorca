@@ -45,23 +45,27 @@ export default function ToolsPage() {
   return (
     <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6 sm:space-y-8">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-        <div>
-          <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold tracking-tight text-primary mb-2">
-            Tools & Features
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary font-headline">Platform Features</span>
+          </div>
+          <h1 className="text-display-md text-4xl sm:text-5xl font-headline font-extrabold tracking-tight text-primary mb-2">
+            Tools & Resources
           </h1>
-          <p className="text-on-surface-variant text-base sm:text-lg max-w-2xl">
-            Configure your prestige stack: AI creative workspace, event intelligence, account controls, and support center.
+          <p className="text-on-surface-variant text-base sm:text-lg max-w-2xl leading-relaxed">
+            Configure your prestige stack: AI creative workspace, event intelligence, account controls, and support.
           </p>
         </div>
-        <div className="prestige-card px-4 py-3 rounded-xl border border-secondary/20 bg-secondary-fixed/10">
+        <div className="clay-card px-6 py-4 rounded-[1.5rem] bg-primary/5 flex items-center gap-4">
           <div className="text-right">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">Workspace Tier</p>
-          <p className="font-headline text-lg sm:text-base font-bold text-secondary">Prestige Studio</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-1">Workspace Tier</p>
+            <p className="font-headline text-lg sm:text-xl font-bold text-primary">Prestige Studio</p>
           </div>
         </div>
       </div>
 
-      <div className="prestige-card p-2 rounded-xl border border-outline-variant/10">
+      <div className="clay-card p-2 sm:p-3 rounded-[2rem] border border-outline-variant/10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {[
             { id: 'ai', label: 'AI Studio', icon: Sparkles },
@@ -77,15 +81,15 @@ export default function ToolsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as 'ai' | 'insights' | 'account' | 'support')}
-                className={`rounded-lg px-3 py-2.5 text-left transition-all ${
+                className={`rounded-[1.5rem] px-4 py-3 sm:py-4 text-left transition-all duration-300 font-headline shadow-sm ${
                   isActive
-                    ? 'bg-primary text-white'
-                    : 'bg-surface-container-low text-on-surface hover:bg-surface-container-high'
+                    ? 'bg-primary text-white shadow-md -translate-y-0.5'
+                    : 'bg-transparent text-on-surface hover:bg-white/40'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-secondary'}`} />
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em]">{tab.label}</span>
+                <div className="flex items-center justify-center sm:justify-start gap-2.5">
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-secondary' : 'text-primary'}`} />
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">{tab.label}</span>
                 </div>
               </button>
             )
@@ -94,23 +98,23 @@ export default function ToolsPage() {
       </div>
 
       {activeTab === 'ai' && (
-        <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <section className="grid grid-cols-1 xl:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="xl:col-span-8 space-y-6">
-            <div className="relative overflow-hidden prestige-card p-5 sm:p-6 rounded-xl border border-primary/10">
-              <div className="absolute top-0 right-0 p-6 opacity-10">
-                <Brain className="w-24 h-24 text-primary" />
+            <div className="relative overflow-hidden clay-card p-8 sm:p-10 rounded-[2rem]">
+              <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                <Brain className="w-32 h-32 text-primary" />
               </div>
-              <div className="relative z-10">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">AI Creative Workspace</p>
-                <h2 className="font-headline text-xl sm:text-2xl font-bold text-primary mb-2">Curate faster with assisted content lanes</h2>
-                <p className="text-on-surface-variant leading-relaxed max-w-3xl">
+              <div className="relative z-10 w-full max-w-2xl">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-secondary mb-3 font-headline">AI Creative Workspace</p>
+                <h2 className="font-headline text-2xl sm:text-4xl font-extrabold text-primary mb-4 leading-tight tracking-tight">Curate faster with assisted content lanes</h2>
+                <p className="text-on-surface-variant leading-relaxed text-sm sm:text-base">
                   Build editorial descriptions, social promotion copy, and guest communication scripts from one place.
-                  Designed for your premium East African event voice.
+                  Designed for your premium event voice.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 { icon: Wand2, title: 'Description Generator', text: 'Draft polished event narratives in your brand tone.' },
                 { icon: Megaphone, title: 'Campaign Copy', text: 'Produce WhatsApp-ready and social-ready invite text.' },
@@ -118,38 +122,43 @@ export default function ToolsPage() {
               ].map((item) => {
                 const Icon = item.icon
                 return (
-                  <article key={item.title} className="prestige-card p-5 rounded-xl border border-outline-variant/10">
-                    <Icon className="w-5 h-5 text-secondary mb-3" />
-                    <h3 className="font-headline font-bold text-primary mb-1">{item.title}</h3>
-                    <p className="text-sm text-on-surface-variant">{item.text}</p>
+                  <article key={item.title} className="clay-card p-6 sm:p-8 rounded-[1.5rem] bg-surface-container-lowest">
+                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-5 border border-primary/20 shadow-inner">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="font-headline font-bold text-primary mb-2 uppercase tracking-wide text-xs">{item.title}</h3>
+                    <p className="text-xs text-on-surface-variant leading-relaxed">{item.text}</p>
                   </article>
                 )
               })}
             </div>
           </div>
 
-          <aside className="xl:col-span-4 space-y-4">
-            <div className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-2">Quick Presets</p>
-              <div className="space-y-2">
+          <aside className="xl:col-span-4 space-y-6">
+            <div className="clay-card p-8 rounded-[2rem] bg-surface-container-lowest">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4 font-headline flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                Quick Presets
+              </p>
+              <div className="space-y-3">
                 {['Corporate Summit', 'Private Soiree', 'Wedding Reception', 'Product Launch'].map((preset) => (
-                  <button key={preset} type="button" className="w-full text-left px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-sm">
+                  <button key={preset} type="button" className="w-full text-left px-5 py-4 rounded-xl bg-white/40 hover:bg-white/60 hover:-translate-y-0.5 transition-all text-sm font-bold text-primary shadow-sm border border-outline-variant/10">
                     {preset}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-3">Status</p>
-              <p className="font-headline font-bold text-secondary">Internal Beta</p>
-              <p className="text-sm text-on-surface-variant mt-2">UI mockup ready. Logic integrations intentionally disabled.</p>
+            <div className="clay-card p-8 rounded-[2rem] bg-primary text-white border-0 shadow-lg">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-2 font-headline">Pipeline Status</p>
+              <p className="font-headline font-extrabold text-2xl tracking-tight text-white mb-2">Internal Beta</p>
+              <p className="text-xs text-white/80 leading-relaxed max-w-[250px]">UI architecture complete. LangChain logic integration intentionally paused until Phase 3.</p>
             </div>
           </aside>
         </section>
       )}
 
       {activeTab === 'insights' && (
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {[
             { icon: LineChart, title: 'Engagement Pulse', value: '87%', caption: 'Invite response velocity (7 days)' },
             { icon: Users, title: 'Guest Conversion', value: '64%', caption: 'Invited to confirmed trendline' },
@@ -157,13 +166,15 @@ export default function ToolsPage() {
           ].map((kpi) => {
             const Icon = kpi.icon
             return (
-              <article key={kpi.title} className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-                <div className="flex items-center gap-3 mb-3">
-                  <Icon className="w-5 h-5 text-secondary" />
-                  <h3 className="font-headline font-bold text-primary">{kpi.title}</h3>
+              <article key={kpi.title} className="clay-card p-8 sm:p-10 rounded-[2rem] border border-outline-variant/10 hover:-translate-y-1 transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="font-headline font-extrabold text-primary uppercase tracking-wider text-xs">{kpi.title}</h3>
                 </div>
-                <p className="text-3xl font-headline font-extrabold text-primary mb-1">{kpi.value}</p>
-                <p className="text-sm text-on-surface-variant">{kpi.caption}</p>
+                <p className="text-6xl sm:text-7xl font-headline font-extrabold text-primary mb-3 drop-shadow-sm tracking-tight">{kpi.value}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant max-w-[180px]">{kpi.caption}</p>
               </article>
             )
           })}
@@ -171,80 +182,101 @@ export default function ToolsPage() {
       )}
 
       {activeTab === 'account' && (
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-4">
-            <h2 className="font-headline text-xl font-bold text-primary">Account Settings</h2>
-            <div className="bg-surface-container-low rounded-lg p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">Auth Status</p>
-              <p className="text-sm text-on-surface">
-                {user?.email ? `Signed in as ${user.email}` : 'No active session'}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="clay-card p-8 sm:p-10 rounded-[2rem] border border-outline-variant/10 space-y-6">
+            <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Account Intelligence</h2>
+            <div className="bg-white/40 rounded-xl p-5 border border-white/50 shadow-inner">
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-1 font-headline">Authentication Status</p>
+              <p className="text-sm font-bold text-primary">
+                {user?.email ? `Session secured as ${user.email}` : 'No active session detected'}
               </p>
             </div>
-            {['Profile & Identity', 'Team Permissions', 'Branding Preferences', 'Notification Rules'].map((item) => (
-              <button key={item} type="button" className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-left">
-                <span className="text-sm font-medium text-on-surface">{item}</span>
-                <ChevronRight className="w-4 h-4 text-on-surface-variant" />
-              </button>
-            ))}
-            <div className="pt-1">
+            <div className="space-y-2">
+              {['Profile & Identity', 'Team Permissions', 'Branding Preferences', 'Notification Rules'].map((item) => (
+                <button key={item} type="button" className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-surface-container-lowest hover:bg-white/60 hover:-translate-y-0.5 text-left transition-all border border-outline-variant/5 shadow-sm">
+                  <span className="text-xs font-bold uppercase tracking-widest text-on-surface">{item}</span>
+                  <ChevronRight className="w-4 h-4 text-primary" />
+                </button>
+              ))}
+            </div>
+            <div className="pt-2">
               {user ? (
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-error-container text-error font-semibold"
+                  className="w-full flex items-center justify-center gap-2 h-12 rounded-[1.5rem] bg-error/10 text-error font-bold uppercase tracking-widest text-[10px] hover:bg-error/20 transition-all border border-error/20 shadow-sm"
                   onClick={handleLogout}
                   disabled={authActionLoading}
                 >
                   <LogOut className="w-4 h-4" />
-                  {authActionLoading ? 'Signing out...' : 'Logout'}
+                  {authActionLoading ? 'Terminating Session...' : 'Terminate Session'}
                 </button>
               ) : (
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-white font-semibold"
+                  className="clay-btn-primary w-full flex items-center justify-center gap-2 h-12 text-xs"
                   onClick={() => router.push('/auth/login')}
                 >
                   <LogIn className="w-4 h-4" />
-                  Go to Login
+                  Establish Connection
                 </button>
               )}
             </div>
           </div>
-          <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-4">
-            <h2 className="font-headline text-xl font-bold text-primary">Security & Privacy</h2>
-            <div className="bg-surface-container-low rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-4 h-4 text-secondary" />
-                <p className="text-sm font-bold text-primary">Session Protection</p>
+          <div className="clay-card p-8 sm:p-10 rounded-[2rem] border border-outline-variant/10 space-y-6 bg-surface-container-lowest">
+            <h2 className="font-headline text-2xl font-extrabold text-primary tracking-tight">Security & Governance</h2>
+            <div className="bg-white/40 rounded-xl p-6 border border-white/50 shadow-inner space-y-3">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-primary" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">Session Guard</p>
               </div>
-              <p className="text-sm text-on-surface-variant">Mock UI state only. Functional controls will be connected later.</p>
+              <p className="text-xs tracking-wide text-on-surface-variant leading-relaxed">System architecture configured for internal beta. Functional governance controls will be dynamically connected in subsequent phases.</p>
             </div>
-            <div className="bg-surface-container-low rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Bell className="w-4 h-4 text-secondary" />
-                <p className="text-sm font-bold text-primary">Alert Preferences</p>
+            <div className="bg-white/40 rounded-xl p-6 border border-white/50 shadow-inner space-y-3">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Bell className="w-4 h-4 text-primary" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">Alert Topology</p>
               </div>
-              <p className="text-sm text-on-surface-variant">Choose where event alerts appear (email is intentionally not part of guest flow).</p>
+              <p className="text-xs tracking-wide text-on-surface-variant leading-relaxed">Direct where critical event operations surface. SMS pathways will activate upon Twilio/Infobip integration mapping.</p>
             </div>
           </div>
         </section>
       )}
 
       {activeTab === 'support' && (
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <article className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-            <h3 className="font-headline font-bold text-primary mb-2">Documentation Hub</h3>
-            <p className="text-sm text-on-surface-variant mb-4">Review platform guides, feature notes, and migration checklists.</p>
-            <button type="button" className="btn-prestige-secondary text-sm bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim">Open Docs</button>
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <article className="clay-card p-8 sm:p-10 rounded-[2rem] border border-outline-variant/10 flex flex-col justify-between hover:-translate-y-1 transition-transform">
+            <div>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                <HelpCircle className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-headline font-extrabold text-primary mb-3 text-lg tracking-tight">Intelligence Hub</h3>
+              <p className="text-xs text-on-surface-variant leading-relaxed mb-8 font-bold tracking-wide">Review curated guidelines, operational release notes, and deployment architectures.</p>
+            </div>
+            <button type="button" className="clay-btn-secondary text-[10px] uppercase font-bold tracking-[0.2em] h-12 w-full">Access Codex</button>
           </article>
-          <article className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-            <h3 className="font-headline font-bold text-primary mb-2">Priority Support</h3>
-            <p className="text-sm text-on-surface-variant mb-4">Escalate blocker issues for critical event operations.</p>
-            <button type="button" className="btn-prestige-secondary text-sm bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim">Create Ticket</button>
+          <article className="clay-card p-8 sm:p-10 rounded-[2rem] border border-outline-variant/10 flex flex-col justify-between bg-primary/5 hover:-translate-y-1 transition-transform">
+            <div>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-headline font-extrabold text-primary mb-3 text-lg tracking-tight">Direct Escalation</h3>
+              <p className="text-xs text-on-surface-variant leading-relaxed mb-8 font-bold tracking-wide">Bypass standard channels for critical event operations and rapid engineering intervention.</p>
+            </div>
+            <button type="button" className="clay-btn-primary text-[10px] uppercase font-bold tracking-[0.2em] h-12 w-full">Deploy Ticket</button>
           </article>
-          <article className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-            <h3 className="font-headline font-bold text-primary mb-2">Platform Status</h3>
-            <p className="text-sm text-on-surface-variant mb-4">Monitor uptime and planned maintenance windows.</p>
-            <button type="button" className="btn-prestige-secondary text-sm bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim">View Status</button>
+          <article className="clay-card p-8 sm:p-10 rounded-[2rem] border border-outline-variant/10 flex flex-col justify-between hover:-translate-y-1 transition-transform">
+            <div>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-headline font-extrabold text-primary mb-3 text-lg tracking-tight">Network Health</h3>
+              <p className="text-xs text-on-surface-variant leading-relaxed mb-8 font-bold tracking-wide">Monitor real-time infrastructural uptime, degraded dependencies, or scheduled maintenance overlays.</p>
+            </div>
+            <button type="button" className="clay-btn-secondary text-[10px] uppercase font-bold tracking-[0.2em] h-12 w-full">Examine Status</button>
           </article>
         </section>
       )}

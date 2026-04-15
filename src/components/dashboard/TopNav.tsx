@@ -13,13 +13,13 @@ export default function TopNav() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4">
         {/* Brand */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="h-12 sm:h-14 w-44 sm:w-56 overflow-hidden rounded-md shrink-0">
+          <Link href="/dashboard" className="h-14 sm:h-16 w-auto flex items-center shrink-0 group transition-transform hover:scale-105">
             <img
               src="/api/brand/logo/1"
               alt="Evorca logo"
-              className="h-full w-full object-contain object-left scale-150 sm:scale-[1.7] origin-left"
+              className="h-full w-auto object-contain drop-shadow-sm"
             />
-          </div>
+          </Link>
         </div>
 
         {/* Actions */}
@@ -32,15 +32,7 @@ export default function TopNav() {
             <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-white"></span>
           </button>
 
-          <div className="h-7 sm:h-8 w-[1px] bg-outline-variant/20 mx-1 sm:mx-2"></div>
 
-          <Link 
-            href="/dashboard/events/create" 
-            aria-label="Create New Event"
-            className="h-10 w-10 sm:h-11 sm:w-11 inline-flex items-center justify-center rounded-xl bg-primary text-white hover:bg-primary/90 transition-all shadow-sm"
-          >
-            <Plus className="w-5 h-5" />
-          </Link>
 
           <button
             type="button"

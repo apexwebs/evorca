@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Saira_Stencil_One, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/contexts/AuthContext";
 import BottomNav from "@/components/BottomNav";
 import { ReactNode } from "react";
 
-const inter = Inter({
-  variable: "--font-inter",
+const sans = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const sairaStencil = Saira_Stencil_One({
+  variable: "--font-saira-stencil",
   subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -37,11 +38,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${manrope.variable} antialiased`}>
+      <body className={`${sans.variable} ${sairaStencil.variable} antialiased bg-surface text-on-surface`}>
         <AuthProvider>
           <div>
             {children}
-            <Toaster position="top-right" />
+            <Toaster position="top-right"
+              toastOptions={{
+                className: '!bg-surface-container-lowest !text-on-surface !shadow-[6px_6px_16px_#c5c5c5,-6px_-6px_16px_#ffffff] !rounded-2xl !font-sans',
+              }}
+            />
           </div>
         </AuthProvider>
       </body>

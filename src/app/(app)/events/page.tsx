@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Plus, Calendar, Users } from 'lucide-react'
+import { Plus, Calendar, Users, Ticket } from 'lucide-react'
+import { CardSkeleton } from '@/components/ui/Skeleton'
 
 interface Event {
   id: string
@@ -41,71 +42,77 @@ export default function EventsPage() {
   }, [])
 
   return (
-    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-5 sm:space-y-7">
+    <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
-        <div>
-          <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold text-primary mb-2">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shadow-sm">
+            <Ticket className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary font-headline">Operations</span>
+          </div>
+          <h1 className="text-display-md text-4xl sm:text-5xl font-headline font-extrabold text-primary mb-2 tracking-tight">
             Your Events
           </h1>
-          <p className="text-on-surface-variant text-base sm:text-lg">
-            Manage and organize all your event experiences in one place.
+          <p className="text-on-surface-variant text-base sm:text-lg max-w-2xl leading-relaxed">
+            Manage and organize all your curated experiences in one place.
           </p>
         </div>
-        <Link href="/dashboard/events/create" className="btn-prestige-primary inline-flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-4 rounded-lg text-sm">
-          <Plus className="w-4 h-4" />
-          New Event
-        </Link>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="text-on-surface-variant">Loading events...</div>
+        <div className="space-y-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
         </div>
       ) : error ? (
-        <div className="flex justify-center py-20">
-          <div className="text-error text-sm">{error}</div>
+        <div className="flex justify-center py-20 animate-in fade-in zoom-in duration-300">
+          <div className="px-6 py-4 bg-error/10 text-error text-sm font-bold rounded-2xl border border-error/20 inline-flex items-center gap-3 shadow-md">
+            {error}
+          </div>
         </div>
       ) : events.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low/50 rounded-2xl border-2 border-dashed border-outline-variant/20">
-          <div className="bg-white p-6 rounded-full shadow-sm mb-6">
-            <Calendar className="w-12 h-12 text-outline-variant" />
+        <div className="clay-card flex flex-col items-center justify-center py-24 text-center rounded-[2rem] border border-outline-variant/10 shadow-sm animate-in fade-in duration-500">
+          <div className="bg-primary/10 p-8 rounded-full shadow-inner mb-6">
+            <Calendar className="w-12 h-12 text-primary" />
           </div>
-          <p className="font-headline text-lg text-primary font-bold mb-2">No Events Yet</p>
-          <p className="text-on-surface-variant text-sm mb-8 text-center max-w-xs">
-            Create your first event to get started.
+          <p className="font-headline text-2xl text-primary font-extrabold mb-3 tracking-tight">No Events Yet</p>
+          <p className="text-on-surface-variant font-bold text-sm mb-10 max-w-xs leading-relaxed uppercase tracking-widest">
+            Create your first curated experience to get started.
           </p>
-          <Link href="/dashboard/events/create" className="btn-prestige-primary flex items-center gap-2">
+          <Link href="/dashboard/events/create" className="clay-btn-primary flex items-center gap-3 px-8 h-12 text-xs">
             <Plus className="w-4 h-4" />
-            Create Event
+            Create Experience
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {events.map((event) => (
-            <Link key={event.id} href={`/dashboard/events/hub/${event.id}`}>
-              <div className="prestige-card p-4 sm:p-5 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all cursor-pointer hover:shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="font-headline font-bold text-lg sm:text-xl text-primary mb-2 leading-tight">{event.title}</h3>
-                    <div className="flex items-center gap-4 text-sm text-on-surface-variant">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.date_start).toLocaleDateString()}</span>
+            <Link key={event.id} href={`/dashboard/events/hub/${event.id}`} className="block group">
+              <div className="clay-card p-6 sm:p-8 rounded-[2rem] transition-all duration-300 border border-outline-variant/10 hover:border-primary/30 group-hover:shadow-lg group-hover:-translate-y-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className="flex-1 space-y-3">
+                    <h3 className="font-headline font-extrabold text-xl sm:text-2xl text-primary leading-tight tracking-tight">{event.title}</h3>
+                    <div className="flex flex-wrap items-center gap-5 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-secondary" />
+                        <span>{new Date(event.date_start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       </div>
                       {event.max_guests && (
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          <span>{event.max_guests} guests</span>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-secondary" />
+                          <span>{event.max_guests} Guests Max</span>
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
-                    event.status === 'published'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-outline-variant/10 text-on-surface-variant'
-                  }`}>
-                    {event.status}
+                  <div className="shrink-0 flex sm:justify-end">
+                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] shadow-sm flex items-center justify-center ${
+                      event.status === 'published'
+                        ? 'bg-primary/10 text-primary border border-primary/20'
+                        : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/10'
+                    }`}>
+                      {event.status}
+                    </div>
                   </div>
                 </div>
               </div>

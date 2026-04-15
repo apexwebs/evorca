@@ -3,6 +3,7 @@
 import { Calendar, Users, QrCode, TrendingUp, Sparkles, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { CardSkeleton } from '@/components/ui/Skeleton'
 
 interface Event {
   id: string
@@ -77,9 +78,9 @@ export default function Dashboard() {
         </div>
 
         {/* Tonal Layering Stats */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3 w-full">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 w-full">
           {stats.map((stat, i) => (
-            <div key={i} className="prestige-card px-4 py-3 rounded-xl border border-outline-variant/10 min-h-[92px] flex flex-col justify-between">
+            <div key={i} className="clay-card px-5 py-4 min-h-[100px] flex flex-col justify-between">
               <div className="flex items-center gap-2 mb-1">
                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
                 <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-on-surface-variant/75">{stat.label}</span>
@@ -91,7 +92,7 @@ export default function Dashboard() {
       </div>
 
       {/* AI Insights - SIGNATURE GLOW */}
-      <div className="relative overflow-hidden prestige-card p-5 sm:p-6 rounded-xl border border-primary/10 shadow-sm">
+      <div className="relative overflow-hidden clay-card p-6 shadow-sm">
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <Sparkles className="w-24 h-24 text-primary" />
         </div>
@@ -108,7 +109,7 @@ export default function Dashboard() {
               to maximize mobile check-in efficiency at the gate.
             </p>
           </div>
-          <button className="btn-prestige-primary text-xs h-10 px-4 rounded-lg shadow-none hover:shadow-primary/10">
+          <button className="clay-btn-secondary text-xs h-10 px-6 rounded-[2rem] shadow-none py-0 flex items-center justify-center">
             View Analysis
           </button>
         </div>
@@ -122,8 +123,10 @@ export default function Dashboard() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <div className="text-on-surface-variant">Loading events...</div>
+          <div className="space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
         ) : error ? (
           <div className="flex justify-center py-20">
@@ -131,25 +134,25 @@ export default function Dashboard() {
           </div>
         ) : events.length === 0 ? (
           /* Empty State */
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low/50 rounded-2xl border-2 border-dashed border-outline-variant/20">
-            <div className="bg-white p-6 rounded-full shadow-sm mb-6">
-              <Calendar className="w-12 h-12 text-outline-variant" />
+          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low/50 rounded-[3rem] border-2 border-dashed border-outline-variant/30 transition-all hover:bg-surface-container-low">
+            <div className="bg-white p-6 rounded-[2rem] shadow-[inset_2px_2px_4px_rgba(255,255,255,0.8),_inset_-2px_-2px_4px_rgba(0,0,0,0.02),_8px_8px_16px_rgba(0,0,0,0.05)] mb-6">
+              <Calendar className="w-12 h-12 text-primary" />
             </div>
-            <p className="font-headline text-lg text-primary font-bold mb-2">No Active Curations</p>
-            <p className="text-on-surface-variant text-sm mb-8 text-center max-w-xs">
+            <p className="font-headline text-lg text-primary font-bold mb-2 uppercase tracking-widest">No Active Curations</p>
+            <p className="text-on-surface-variant text-sm mb-8 text-center max-w-xs font-sans">
               Begin your next masterpiece by creating a new prestige event experience.
             </p>
-            <Link href="/dashboard/events/create" className="btn-prestige-primary flex items-center gap-2">
-              <Plus className="w-4 h-4" />
+            <Link href="/dashboard/events/create" className="clay-btn-primary flex items-center gap-3">
+              <Plus className="w-5 h-5" />
               <span>Curate New Event</span>
             </Link>
           </div>
         ) : (
           /* Events List */
-          <div className="space-y-4">
+          <div className="space-y-6">
             {events.map((event) => (
               <Link key={event.id} href={`/dashboard/events/hub/${event.id}`}>
-                <div className="prestige-card p-6 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all cursor-pointer hover:shadow-lg">
+                <div className="clay-card p-8 hover:-translate-y-1 hover:border-primary/20 transition-all cursor-pointer">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h4 className="font-headline font-bold text-lg text-primary mb-2">{event.title}</h4>

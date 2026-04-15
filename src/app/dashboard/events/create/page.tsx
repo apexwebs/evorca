@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { MapPin, Sparkles, ChevronRight, ChevronLeft, Check, Ticket, Image as ImageIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 const steps = [
   { id: 1, label: 'Details', icon: Sparkles },
@@ -144,22 +145,26 @@ export default function CreateEvent() {
       </nav>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 mt-12">
         {/* Form Content (Left) */}
         <div className="lg:col-span-7 space-y-6 sm:space-y-8">
           <header>
+            <Breadcrumb items={[
+              { label: 'Events Hub', href: '/dashboard' },
+              { label: 'Curate Event' }
+            ]} />
             <div className="mb-3">
-              <img src="/api/brand/logo/2" alt="Evorca logo" className="h-14 w-auto object-contain" />
+              <img src="/api/brand/logo/2" alt="Evorca logo" className="h-14 w-auto object-contain drop-shadow-md" />
             </div>
-            <h2 className="text-2xl sm:text-4xl font-headline font-extrabold tracking-tight text-primary leading-tight mb-2">
+            <h2 className="text-3xl sm:text-5xl font-headline font-extrabold tracking-tight text-primary leading-tight mb-3">
               Setting the Stage.
             </h2>
-            <p className="text-on-surface-variant text-base sm:text-lg leading-relaxed">
+            <p className="text-on-surface-variant text-base sm:text-lg leading-relaxed font-sans">
               Define the ambiance for your guests. From the grandeur of the ballroom to the intimate details of the invitation.
             </p>
           </header>
 
-          <div className="space-y-6 prestige-card p-4 sm:p-6 rounded-2xl border border-outline-variant/10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="space-y-6 clay-card p-6 sm:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
               <div className="space-y-5">
@@ -428,15 +433,15 @@ export default function CreateEvent() {
               {currentStep < 4 ? (
                 <button 
                   onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-                  className="btn-prestige-primary flex items-center gap-2 px-4 h-10 sm:h-11 rounded-lg text-sm"
+                  className="clay-btn-primary flex items-center gap-2 h-12 text-xs"
                 >
-                  Continue <ChevronRight className="w-4 h-4" />
+                  Continue <ChevronRight className="w-5 h-5" />
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="btn-prestige-primary bg-secondary from-secondary to-secondary-fixed disabled:opacity-50 px-4 h-10 sm:h-11 rounded-lg text-sm"
+                  className="clay-btn-secondary disabled:opacity-50 h-12 text-xs"
                 >
                   {isLoading ? 'Creating...' : 'Curate Experience'}
                 </button>
@@ -447,11 +452,11 @@ export default function CreateEvent() {
 
         {/* AI Sidebar (Right) */}
         <div className="lg:col-span-5 hidden lg:block">
-          <div className="lg:sticky lg:top-32 prestige-card rounded-2xl overflow-hidden border border-outline-variant/10 shadow-xl shadow-primary/5">
-            <div className="bg-primary/5 p-6 flex items-center justify-between border-b border-outline-variant/5">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-primary">Prestige AI Assist</span>
+          <div className="lg:sticky lg:top-32 clay-card overflow-hidden">
+            <div className="bg-primary/5 p-6 flex items-center justify-between border-b border-white/50">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <span className="text-[12px] font-bold uppercase tracking-widest text-primary font-headline">Prestige AI Assist</span>
               </div>
               <span className="text-[10px] font-bold text-primary/50">V1.2</span>
             </div>

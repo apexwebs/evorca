@@ -3,6 +3,20 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
+import { 
+  Calendar, 
+  MapPin, 
+  User, 
+  Phone, 
+  Ticket, 
+  ChevronRight, 
+  CheckCircle2, 
+  ExternalLink,
+  Shirt,
+  Info,
+  Clock,
+  ArrowRight
+} from 'lucide-react'
 
 interface PublicEventDetails {
   title: string
@@ -48,7 +62,7 @@ export default function PublicEventPage() {
         const res = await fetch(`/api/events/${eventId}`)
         const data = await res.json()
         if (!res.ok) {
-          setError(data.error || 'Could not load event')
+          setError(data.error || 'The requested event is currently unavailable.')
           return
         }
         setEvent(data.event)
@@ -118,132 +132,127 @@ export default function PublicEventPage() {
   }
 
   if (isLoading) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-      <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center gap-4">
+      <div className="w-12 h-12 border-4 border-outline-variant/30 border-t-primary rounded-full animate-spin shadow-md" />
+      <p className="font-headline font-bold text-primary animate-pulse uppercase tracking-[0.2em] text-xs">Authenticating...</p>
     </div>
   )
   
   if (error || !event) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-center">
-      <div className="max-w-xs space-y-4">
-        <div className="text-error text-5xl font-light">✕</div>
-        <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.3em] leading-relaxed">
-          {error || 'The requested event is currently unavailable.'}
-        </p>
-        <button onClick={() => window.location.reload()} className="text-primary font-bold text-[10px] uppercase tracking-[0.4em] pt-4">Re-establish Connection</button>
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 text-center">
+      <div className="max-w-md space-y-6 clay-card p-12">
+        <h2 className="text-xl font-headline font-extrabold text-error uppercase tracking-widest">{error || 'Event Not Found'}</h2>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="clay-btn-primary w-full h-12 text-xs flex items-center justify-center"
+        >
+          Re-establish Connection
+        </button>
       </div>
     </div>
   )
 
-  // GUEST PASS VIEW (SINGLE PAGE, NO NAV)
+  const eventDate = new Date(event.date_start)
+
+  // GUEST PASS VIEW (OBSIDIAN EDITION)
   if (guest && (guest.status === 'confirmed' || guest.status === 'checked_in' || guest.status === 'invited')) {
     const isCheckedIn = guest.status === 'checked_in'
     
     return (
-      <div className="min-h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 selection:bg-primary/30">
-        {/* Background Atmosphere */}
-        {event.poster_url && (
-          <div className="fixed inset-0 z-0">
-            <img 
-              src={event.poster_url} 
-              alt=""
-              className="w-full h-full object-cover opacity-20 blur-3xl scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/80 via-[#020617]/90 to-[#020617]" />
+      <div className="min-h-screen bg-surface text-on-surface flex flex-col items-center justify-center py-12 px-6 overflow-x-hidden pt-20 pb-20">
+        
+        {/* Animated Background */}
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[-10%] right-[-10%] w-[50vh] h-[50vh] bg-secondary-fixed/20 blur-[100px] rounded-full animate-pulse Mix-blend-multiply" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[50vh] h-[50vh] bg-primary/10 blur-[100px] rounded-full animate-pulse delay-1000 mix-blend-multiply" />
+        </div>
+
+        <div className="relative z-10 w-full max-w-lg space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000">
+          
+          {/* Header */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/50 border border-white shadow-sm mb-2">
+              <Ticket className="w-4 h-4 text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary font-headline">Prestige Entry Document</span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-headline font-extrabold tracking-tight text-primary uppercase leading-tight drop-shadow-md">
+              {event.title}
+            </h1>
           </div>
-        )}
 
-        <div className="relative z-10 w-full max-w-sm animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="relative bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.8)] overflow-hidden">
+          {/* Invitation Card */}
+          <div className="clay-card rounded-[3rem] overflow-hidden p-0 relative bg-white/60 backdrop-blur-xl border border-white">
             
-            <div className="p-8 pb-4 text-center">
-              <div className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-4">
-                <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Official Pass</span>
-              </div>
-              <h2 className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Presented at</h2>
-              <h1 className="text-xl font-headline font-black tracking-tighter text-white leading-tight uppercase">
-                {event.title}
-              </h1>
-            </div>
-
-            <div className="px-8 py-6 text-center bg-gradient-to-b from-white/[0.03] to-transparent">
-              <p className="text-primary text-[10px] font-bold uppercase tracking-[0.4em] mb-2 opacity-80">Honored Guest</p>
-              <h3 className="text-4xl sm:text-5xl font-headline font-black tracking-tighter text-white drop-shadow-2xl">
+            {/* VIP Highlight */}
+            <div className="p-10 text-center bg-white/40 border-b border-white/50">
+              <p className="text-primary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 font-headline">Exclusively For</p>
+              <h2 className="text-4xl sm:text-5xl font-headline font-extrabold tracking-tight text-on-surface uppercase truncate drop-shadow-sm">
                 {guest.full_name}
-              </h3>
+              </h2>
             </div>
 
-            <div className="px-8 py-10 flex flex-col items-center">
-              <div className="relative group">
-                <div className="absolute -inset-10 bg-primary/20 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-1000" />
-                <div className="relative p-6 bg-white rounded-[2.5rem] shadow-[0_0_50px_rgba(var(--color-primary),0.2)]">
-                  <QRCodeSVG 
-                    value={`${window.location.origin}/events/${eventId}?ticket=${guest.ticket_code}`} 
-                    size={180} 
-                    level="H" 
-                    bgColor="#ffffff" 
-                    fgColor="#020617"
-                  />
-                  
-                  {isCheckedIn && (
-                    <div className="absolute inset-0 bg-success/90 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center text-white animate-in zoom-in duration-300">
-                      <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl mb-2">✓</div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Verified</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-10 pt-4 space-y-8">
-              <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
-                <div className="space-y-1.5">
-                  <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">When</p>
-                  <p className="text-[11px] font-bold text-white/90 leading-tight uppercase">
-                    {new Date(event.date_start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}<br/>
-                    at {new Date(event.date_start).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <div className="space-y-1.5 text-right">
-                  <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Venue</p>
-                  <p className="text-[11px] font-bold text-white/90 leading-tight uppercase">
-                    {event.location_name}<br/>
-                    <span className="text-primary font-bold">{event.city}</span>
-                  </p>
-                </div>
-              </div>
-
-              {event.description && (
-                <div className="space-y-2 border-t border-white/5 pt-6 text-center">
-                  <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest">Event Context</p>
-                  <p className="text-[10px] text-white/60 leading-relaxed font-medium">
-                    {event.description}
-                  </p>
-                </div>
-              )}
-
-              <div className="flex gap-4">
-                <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.location_name} ${event.location_address} ${event.city}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-white/5 border border-white/10 text-white/80 py-4 rounded-2xl text-[9px] font-bold uppercase tracking-widest text-center hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-                >
-                  <span className="opacity-60 uppercase">Get Directions</span>
-                </a>
-                {event.dress_code && (
-                  <div className="flex-1 bg-primary/5 border border-primary/20 text-primary py-4 rounded-2xl text-[9px] font-bold uppercase tracking-widest text-center flex items-center justify-center gap-2">
-                    {event.dress_code}
+            {/* QR Section */}
+            <div className="p-10 flex flex-col items-center justify-center space-y-8">
+              <div className="relative p-6 bg-white rounded-[2rem] shadow-xl transition-transform hover:scale-[1.02] duration-500 border border-outline-variant/10">
+                <QRCodeSVG 
+                  value={`${window.location.origin}/events/${eventId}?ticket=${guest.ticket_code}`} 
+                  size={200} 
+                  level="H" 
+                  bgColor="#ffffff" 
+                  fgColor="#000000"
+                  className="rounded-xl"
+                />
+                {isCheckedIn && (
+                  <div className="absolute inset-0 bg-primary/95 backdrop-blur-md rounded-[2rem] flex flex-col items-center justify-center text-white animate-in zoom-in duration-300">
+                    <CheckCircle2 className="w-16 h-16 mb-2 text-secondary" />
+                    <span className="text-[12px] font-headline font-black uppercase tracking-[0.2em] shadow-sm text-center">Verified<br/>Access</span>
                   </div>
                 )}
               </div>
+              <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-[0.3em] font-headline">Scan at checkpoint</p>
             </div>
 
-            <div className="h-2 bg-gradient-to-r from-primary via-primary/50 to-primary/10" />
+            {/* Logistics Grid */}
+            <div className="px-8 pb-8 pt-4 grid grid-cols-2 gap-8 border-t border-white/50">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-primary">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] font-headline">Schedule</p>
+                </div>
+                <p className="text-xs font-bold text-on-surface leading-tight uppercase tracking-wider font-sans">
+                  {eventDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}<br/>
+                  <span className="text-on-surface-variant font-bold tracking-widest mt-1.5 inline-block">At {eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
+                </p>
+              </div>
+              <div className="space-y-2 text-right">
+                <div className="flex items-center justify-end gap-2 text-primary">
+                  <MapPin className="w-3.5 h-3.5" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] font-headline">Venue</p>
+                </div>
+                <p className="text-xs font-bold text-on-surface leading-tight uppercase tracking-wider font-sans">
+                  {event.location_name}<br/>
+                  <span className="text-on-surface-variant font-bold tracking-widest mt-1.5 inline-block">{event.city}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Dress Code Action */}
+            <div className="px-8 pb-8 rounded-b-[3rem]">
+              <a 
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.location_name} ${event.location_address} ${event.city}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full clay-btn-secondary h-14 flex items-center justify-center gap-3 text-xs"
+              >
+                <MapPin className="w-4 h-4" />
+                Get Directions
+              </a>
+            </div>
           </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-white/20 text-[8px] font-bold uppercase tracking-[0.5em]">
+          {/* Footer Branding */}
+          <div className="text-center pt-6">
+            <p className="text-on-surface-variant/40 text-[10px] font-headline font-bold uppercase tracking-[0.5em]">
               EVORCA PRESTIGE EXPERIENCE
             </p>
           </div>
@@ -252,135 +261,242 @@ export default function PublicEventPage() {
     )
   }
 
-  // PUBLIC VIEW / RSVP PAGE
+  // PUBLIC LANDING VIEW (OBSIDIAN EDITION)
   return (
-    <div className="min-h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 selection:bg-primary/30">
-      {/* Background Atmosphere */}
-      {event.poster_url && (
-        <div className="fixed inset-0 z-0">
-          <img 
-            src={event.poster_url} 
-            alt=""
-            className="w-full h-full object-cover opacity-20 blur-3xl scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/80 via-[#020617]/90 to-[#020617]" />
-        </div>
-      )}
+    <div className="min-h-screen bg-surface text-on-surface selection:bg-primary/20 relative font-sans overflow-x-hidden">
+      
+      {/* Background Orbs */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-20%] right-[-10%] w-[70vh] h-[70vh] bg-secondary-fixed/30 blur-[120px] rounded-full animate-pulse mix-blend-multiply" />
+        <div className="absolute top-[40%] left-[-20%] w-[60vh] h-[60vh] bg-primary/20 blur-[120px] rounded-full animate-pulse delay-700 mix-blend-multiply" />
+      </div>
 
-      <div className="relative z-10 w-full max-w-sm animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        <div className="relative bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.8)] overflow-hidden">
-          
-          {/* Hero Section */}
-          <div className="p-10 pb-6 text-center">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">RSVP Request</span>
+      {/* 1. Cinematic Hero Section */}
+      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+        {/* Full-Screen Poster Background with Blur for Claymorphism */}
+        <div className="absolute inset-0 z-0 opacity-80 backdrop-blur-[60px]">
+          {event.poster_url ? (
+            <img 
+              src={event.poster_url} 
+              alt={event.title}
+              className="w-full h-full object-cover blur-[50px] scale-110 opacity-30 animate-in fade-in duration-[2000ms]"
+            />
+          ) : (
+            <div className="w-full h-full bg-surface-container" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 container mx-auto px-6 text-center space-y-10 max-w-5xl mt-20">
+          <div className="animate-in fade-in slide-in-from-top-12 duration-1000">
+            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/60 border border-white/80 shadow-md backdrop-blur-md mb-8">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary font-headline">By Invitation Only</span>
             </div>
-            <h1 className="text-3xl font-headline font-black tracking-tighter text-white leading-tight uppercase mb-2">
+            
+            <h1 className="text-6xl sm:text-8xl lg:text-9xl font-headline font-extrabold tracking-tight text-primary uppercase leading-[0.9] drop-shadow-xl p-4">
               {event.title}
             </h1>
-            <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">Secure your access</p>
           </div>
 
-          {/* Details Bar */}
-          <div className="px-10 py-6 border-y border-white/5 bg-white/[0.02] grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest">Schedule</p>
-              <p className="text-[11px] font-bold text-white/90 uppercase">
-                {new Date(event.date_start).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} @ {new Date(event.date_start).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+          <div className="flex flex-wrap items-start justify-center gap-6 sm:gap-10 pt-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
+            <div className="clay-card p-6 flex flex-col items-center gap-3 w-40">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Schedule</p>
+                <p className="text-xs font-bold uppercase text-primary mt-1">{eventDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+              </div>
+            </div>
+            <div className="clay-card p-6 flex flex-col items-center gap-3 w-40">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Venue</p>
+                <p className="text-xs font-bold uppercase text-primary mt-1 truncate w-full">{event.location_name}</p>
+              </div>
+            </div>
+            <div className="clay-card p-6 flex flex-col items-center gap-3 w-40">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                <Shirt className="w-4 h-4" />
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Attire</p>
+                <p className="text-xs font-bold uppercase text-primary mt-1 truncate w-full">{event.dress_code || 'Elite'}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-16">
+            <a 
+              href="#rsvp" 
+              className="clay-btn-primary inline-flex h-14 px-12 text-[11px] items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+            >
+              Request Entry Access
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Narrative & RSVP Section */}
+      <section className="container relative z-10 mx-auto px-6 py-32 max-w-6xl">
+        <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-start">
+          
+          {/* Narrative Content */}
+          <div className="space-y-16">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-px bg-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary font-headline">The Experience</span>
+              </div>
+              <h2 className="text-4xl sm:text-6xl font-headline font-extrabold uppercase tracking-tight leading-[1] text-primary drop-shadow-sm">
+                Unrivaled<br/>Prestige
+              </h2>
+              <p className="text-lg text-on-surface-variant leading-relaxed font-sans max-w-xl text-justify">
+                {event.description || "Prepare yourself for a curated evening of unparalleled sophistication. Evorca brings together the most influential minds and creative spirits for a moment that transcends the ordinary."}
               </p>
             </div>
-            <div className="space-y-1 text-right">
-              <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest">Venue</p>
-              <p className="text-[11px] font-bold text-white/90 uppercase truncate">
-                {event.location_name}
-              </p>
+
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="clay-card p-8 space-y-4">
+                <div className="w-12 h-12 rounded-[1rem] bg-white border border-outline-variant/10 shadow-sm flex items-center justify-center text-primary">
+                  <Shirt className="w-5 h-5" />
+                </div>
+                <h3 className="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary">Dress Atmosphere</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed uppercase tracking-widest font-bold">
+                  {event.dress_code ? `Attire: ${event.dress_code}` : "Sophisticated cocktail attire expected."}
+                </p>
+              </div>
+              <div className="clay-card p-8 space-y-4">
+                <div className="w-12 h-12 rounded-[1rem] bg-white border border-outline-variant/10 shadow-sm flex items-center justify-center text-primary">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <h3 className="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary">Exclusive Venue</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed uppercase tracking-widest font-bold">
+                  {event.location_name}<br/>
+                  {event.city}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* RSVP FORM */}
-          <div className="p-10 pt-8 space-y-8 text-center">
-            {!registrationSuccess ? (
-              <form onSubmit={handleSubmit} className="space-y-6 text-left">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40 ml-2">Full Name</label>
-                    <input
-                      type="text"
-                      name="full_name"
-                      value={formData.full_name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all placeholder:text-white/10"
-                      placeholder="e.g. Alexander Pierce"
-                    />
+          {/* RSVP Clay Card */}
+          <div id="rsvp" className="lg:sticky lg:top-24">
+            <div className="clay-card p-10 sm:p-12 text-center rounded-[3rem] border border-white shadow-2xl relative overflow-hidden bg-white/40 backdrop-blur-2xl">
+              
+              {!registrationSuccess ? (
+                <>
+                  <div className="space-y-4 mb-10 text-left">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-white shadow-sm self-start">
+                      <User className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary font-headline">Registration Portal</span>
+                    </div>
+                    <h3 className="text-3xl sm:text-4xl font-headline font-extrabold uppercase tracking-tight text-primary drop-shadow-md">Apply for Entry</h3>
+                    <p className="text-on-surface-variant text-[11px] font-bold uppercase tracking-[0.2em] font-headline">Credentials Required</p>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40 ml-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={(e) => {
-                        let val = e.target.value.replace(/[^\d+]/g, '')
-                        if (val.startsWith('0')) val = '+254' + val.slice(1)
-                        else if ((val.startsWith('7') || val.startsWith('1')) && !val.includes('+')) val = '+254' + val
-                        else if (val.startsWith('254') && !val.includes('+')) val = '+' + val
-                        if (val.length <= 13) setFormData(prev => ({ ...prev, phone: val }))
-                      }}
-                      required
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white font-mono tracking-[0.2em] focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all placeholder:text-white/10"
-                      placeholder="+254 7XX XXX XXX"
-                    />
+
+                  <form onSubmit={handleSubmit} className="space-y-6 text-left">
+                    <div className="space-y-5">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary ml-4 flex items-center gap-2 font-headline">
+                          Full Identity
+                        </label>
+                        <input
+                          type="text"
+                          name="full_name"
+                          value={formData.full_name}
+                          onChange={handleInputChange}
+                          required
+                          className="clay-input w-full h-14 px-6 text-sm"
+                          placeholder="e.g. Alexander Pierce"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary ml-4 flex items-center gap-2 font-headline">
+                          Mobile Contact
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/[^\d+]/g, '')
+                            if (val.startsWith('0')) val = '+254' + val.slice(1)
+                            else if ((val.startsWith('7') || val.startsWith('1')) && !val.includes('+')) val = '+254' + val
+                            else if (val.startsWith('254') && !val.includes('+')) val = '+' + val
+                            if (val.length <= 13) setFormData(prev => ({ ...prev, phone: val }))
+                          }}
+                          required
+                          className="clay-input w-full h-14 px-6 text-sm font-mono tracking-widest"
+                          placeholder="+254 7XX XXX XXX"
+                        />
+                      </div>
+                    </div>
+
+                    {error && (
+                      <div className="p-4 bg-error/10 border border-error/20 rounded-2xl animate-in fade-in zoom-in duration-300">
+                        <p className="text-error text-[10px] font-bold uppercase tracking-widest text-center">{error}</p>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="clay-btn-primary w-full h-14 text-xs mt-4 flex items-center justify-center gap-2 group"
+                    >
+                      {isSubmitting ? (
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          Submit Credentials
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="text-center space-y-8 py-8 animate-in zoom-in duration-700">
+                  <div className="w-24 h-24 bg-white border border-outline-variant/10 rounded-full flex items-center justify-center text-primary text-5xl mx-auto shadow-md">
+                    <CheckCircle2 className="w-12 h-12" />
                   </div>
-                </div>
-
-                {error && (
-                  <p className="text-error/80 text-[10px] font-bold uppercase tracking-widest text-center animate-in fade-in slide-in-from-top-2">
-                    {error}
-                  </p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-primary text-[#020617] py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 shadow-[0_20px_40px_-12px_rgba(var(--color-primary),0.3)]"
-                >
-                  {isSubmitting ? 'Confirming...' : 'Complete RSVP'}
-                </button>
-              </form>
-            ) : (
-              <div className="text-center space-y-8 animate-in zoom-in duration-500">
-                <div className="w-20 h-20 bg-success/10 border border-success/20 rounded-full flex items-center justify-center mx-auto text-success text-3xl">
-                  ✓
-                </div>
-                <div className="space-y-3">
-                  <h3 className="font-headline text-2xl font-black text-white uppercase tracking-tighter">RSVP Confirmed</h3>
-                  <p className="text-white/50 text-[11px] font-medium leading-relaxed px-4">
-                    {registrationSuccess}
-                  </p>
-                </div>
-                
-                <div className="pt-4">
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-headline font-extrabold text-primary uppercase tracking-tight">Access Granted</h3>
+                    <p className="text-on-surface-variant text-[11px] font-bold uppercase tracking-widest leading-relaxed max-w-[280px] mx-auto font-headline">
+                      {registrationSuccess}
+                    </p>
+                  </div>
                   <button 
                     onClick={() => window.location.reload()}
-                    className="w-full bg-white text-[#020617] py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] hover:scale-[1.02] transition-all shadow-2xl"
+                    className="clay-btn-secondary w-full h-14 text-xs font-headline flex items-center justify-center gap-3 tracking-[0.2em]"
                   >
-                    Reveal My Guest Pass
+                    Retrieve Guest Pass
+                    <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-
-          <div className="h-2 bg-gradient-to-r from-primary via-primary/50 to-primary/10" />
         </div>
+      </section>
 
-        <div className="mt-12 text-center">
-          <p className="text-white/20 text-[8px] font-bold uppercase tracking-[0.5em]">
-            EVORCA PRESTIGE EXPERIENCE
-          </p>
+      {/* 3. Footer Branding */}
+      <footer className="py-24 relative z-10 border-t border-outline-variant/10">
+        <div className="container mx-auto px-6 text-center space-y-8">
+          <div className="flex items-center justify-center gap-4 opacity-30">
+            <div className="h-px w-16 bg-primary" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <div className="h-px w-16 bg-primary" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-primary text-[10px] font-headline font-extrabold uppercase tracking-[0.5em]">EVORCA PRESTIGE</p>
+            <p className="text-on-surface-variant text-[8px] font-bold uppercase tracking-[0.4em]">An Elevated Experience Collection</p>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   )
 }

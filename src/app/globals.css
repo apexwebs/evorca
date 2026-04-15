@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter);
-  --font-headline: var(--font-manrope);
+  --font-sans: var(--font-sans);
+  --font-headline: var(--font-saira-stencil);
 
   --color-primary: #00535b;
   --color-primary-container: #006d77;
   --color-on-primary: #ffffff;
   
-  --color-secondary: #735c00;
-  --color-secondary-fixed: #fed65b;
-  --color-on-secondary-fixed: #241a00;
+  --color-secondary: #8b6508;
+  --color-secondary-fixed: #ffd700; /* POP Gold */
+  --color-on-secondary-fixed: #1a1300;
   
-  --color-surface: #f9f9fc;
-  --color-surface-container-low: #f3f3f6;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-high: #e8e8ea;
-  --color-on-surface: #1a1c1e;
+  --color-surface: #ebf0f2; /* slightly greyish blue for depth */
+  --color-surface-container-low: #e1e7e9;
+  --color-surface-container-lowest: #f5f8f9;
+  --color-surface-container-high: #d5dbde;
+  --color-on-surface: #10181A;
   --color-on-surface-variant: #3e494a;
   
   --color-outline-variant: #bec8ca;
@@ -38,24 +38,83 @@
     @apply bg-surface-container-low;
   }
   
-  .prestige-card {
-    @apply bg-surface-container-lowest shadow-sm transition-all duration-300;
+  /* CLAYMORPHISM CARD SYSTEM */
+  .prestige-card, .clay-card {
+    @apply bg-surface-container-lowest transition-all duration-300 rounded-[2rem] border-[3px] border-white/50;
+    box-shadow: 
+      12px 12px 24px rgba(0,0,0,0.06), 
+      -12px -12px 24px rgba(255,255,255,0.9),
+      inset 2px 2px 4px rgba(255,255,255,0.8),
+      inset -2px -2px 4px rgba(0,0,0,0.02);
+  }
+
+  .prestige-card:hover, .clay-card:hover {
+    box-shadow: 
+      16px 16px 32px rgba(0,0,0,0.08), 
+      -16px -16px 32px rgba(255,255,255,0.95),
+      inset 2px 2px 4px rgba(255,255,255,0.8),
+      inset -2px -2px 4px rgba(0,0,0,0.02);
   }
 
   /* GLASSMORPHISM */
   .glass-nav {
-    @apply bg-white/80 backdrop-blur-xl;
+    @apply bg-surface-container-lowest/70 backdrop-blur-xl border-b border-white/30;
   }
 
-  /* SIGNATURE POLISH BUTTON */
-  .btn-prestige-primary {
-    @apply bg-gradient-to-br from-primary to-primary-container text-white px-6 py-3 rounded-xl font-medium 
-           hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95;
+  /* SIGNATURE POLISH BUTTON (CLAY) */
+  .btn-prestige-primary, .clay-btn-primary {
+    @apply bg-primary-container text-white px-8 py-4 rounded-3xl font-headline font-bold uppercase tracking-[0.2em] transition-all;
+    box-shadow: 
+      5px 5px 12px rgba(0,0,0,0.15), 
+      -5px -5px 12px rgba(255,255,255,0.1),
+      inset 2px 2px 6px rgba(255,255,255,0.2),
+      inset -2px -2px 6px rgba(0,0,0,0.2);
+  }
+  .btn-prestige-primary:active, .clay-btn-primary:active {
+    box-shadow: 
+      inset 4px 4px 10px rgba(0,0,0,0.3),
+      inset -4px -4px 10px rgba(255,255,255,0.1);
+    @apply scale-[0.98];
   }
 
-  /* EDITORIAL INPUTS (Minimalist Underline) */
-  .input-prestige {
-    @apply border-0 border-b-2 border-outline-variant/15 bg-transparent focus:ring-0 
-           focus:border-primary transition-all px-0 py-2 text-lg;
+  .btn-prestige-secondary, .clay-btn-secondary {
+    @apply bg-secondary-fixed text-on-secondary-fixed px-8 py-4 rounded-3xl font-headline font-bold uppercase tracking-[0.2em] transition-all;
+    box-shadow: 
+      5px 5px 12px rgba(0,0,0,0.1), 
+      -5px -5px 12px rgba(255,255,255,0.4),
+      inset 2px 2px 6px rgba(255,255,255,0.5),
+      inset -2px -2px 6px rgba(0,0,0,0.1);
+  }
+  .btn-prestige-secondary:active, .clay-btn-secondary:active {
+    box-shadow: 
+      inset 4px 4px 10px rgba(0,0,0,0.2),
+      inset -4px -4px 10px rgba(255,255,255,0.3);
+    @apply scale-[0.98];
+  }
+
+  /* DANGER CLAY BUTTON */
+  .btn-prestige-danger {
+    @apply bg-[#e63946] text-white px-6 py-3 rounded-2xl font-headline font-bold uppercase tracking-widest transition-all;
+    box-shadow: 
+      4px 4px 10px rgba(230,57,70,0.2), 
+      -4px -4px 10px rgba(255,255,255,0.5),
+      inset 2px 2px 4px rgba(255,255,255,0.3),
+      inset -2px -2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* EDITORIAL INPUTS (Clay) */
+  .input-prestige, .form-input {
+    @apply bg-surface-container-lowest text-on-surface rounded-2xl border-2 border-white/60 focus:outline-none focus:ring-0 transition-all px-4 py-3 text-base font-sans;
+    box-shadow: 
+      inset 3px 3px 6px rgba(0,0,0,0.03), 
+      inset -3px -3px 6px rgba(255,255,255,0.8),
+      3px 3px 10px rgba(0,0,0,0.02);
+  }
+  .input-prestige:focus, .form-input:focus {
+    @apply border-primary/30;
+    box-shadow: 
+      inset 4px 4px 8px rgba(0,0,0,0.05), 
+      inset -4px -4px 8px rgba(255,255,255,0.9),
+      0 0 0 3px rgba(0,109,119,0.1);
   }
 }

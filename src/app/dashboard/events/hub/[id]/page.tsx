@@ -6,9 +6,12 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-hot-toast'
-import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine } from 'lucide-react'
+import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus } from 'lucide-react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import EventEditForm from '@/components/EventEditForm'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { Drawer } from '@/components/ui/Drawer'
+import { CardSkeleton } from '@/components/ui/Skeleton'
 
 interface EventDetails {
   id: string
@@ -89,7 +92,13 @@ export default function EventHubPage() {
   ]
 
   if (isLoading) {
-    return <div className="py-20 text-center text-on-surface-variant">Loading event hub...</div>
+    return (
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 pt-8">
+        <Breadcrumb items={[{ label: 'Events Hub', href: '/dashboard' }, { label: 'Loading...' }]} />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    )
   }
 
   if (error || !event) {
@@ -109,14 +118,18 @@ export default function EventHubPage() {
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       {/* Header Section */}
       <div className="space-y-4 sm:space-y-6">
+        <Breadcrumb items={[
+          { label: 'Events Hub', href: '/dashboard' },
+          { label: event.title }
+        ]} />
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div>
           <h1 className="text-display-md text-3xl sm:text-4xl font-headline font-extrabold text-primary mb-2">
             {event.title}
           </h1>
-          <p className="text-on-surface-variant text-base sm:text-lg">{event.description}</p>
+          <p className="text-on-surface-variant text-base sm:text-lg font-sans max-w-2xl">{event.description}</p>
           </div>
-          <div className="prestige-card px-4 py-3 rounded-xl border border-outline-variant/10">
+          <div className="clay-card px-5 py-4 border border-outline-variant/10">
             <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">Event Status</p>
             <div className="flex items-center gap-2">
               <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
@@ -136,7 +149,7 @@ export default function EventHubPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="prestige-card p-2 rounded-2xl border border-outline-variant/10 overflow-x-auto">
+        <div className="clay-card p-3 border border-outline-variant/10 overflow-x-auto rounded-[2rem]">
           <div className="flex gap-2 min-w-max">
             {tabs.map((tab) => {
               const Icon = tab.icon
@@ -146,9 +159,9 @@ export default function EventHubPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
                     isActive
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-white shadow-md'
                       : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-low'
                   }`}
                 >
@@ -229,49 +242,49 @@ function OverviewTab({ event, eventId }: { event: EventDetails; eventId: string 
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="prestige-card p-4 rounded-xl border border-outline-variant/10">
-            <p className="text-xs font-bold uppercase text-on-surface-variant mb-1">Date & Time</p>
-            <p className="text-lg font-semibold text-primary">{new Date(event.date_start).toLocaleString()}</p>
+          <div className="clay-card p-5 border border-outline-variant/10 text-center flex flex-col justify-center items-center">
+            <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1 tracking-widest">Date & Time</p>
+            <p className="text-xl font-headline font-bold text-primary">{new Date(event.date_start).toLocaleString()}</p>
           </div>
-          <div className="prestige-card p-4 rounded-xl border border-outline-variant/10">
-            <p className="text-xs font-bold uppercase text-on-surface-variant mb-1">Status</p>
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
-              event.status === 'published' ? 'bg-primary/10 text-primary' : 'bg-outline-variant/10 text-on-surface-variant'
+          <div className="clay-card p-5 border border-outline-variant/10 text-center flex flex-col justify-center items-center">
+            <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1 tracking-widest">Status</p>
+            <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+              event.status === 'published' ? 'bg-primary text-white shadow-sm' : 'bg-outline-variant/10 text-on-surface-variant'
             }`}>
               {event.status}
             </span>
           </div>
-          <div className="prestige-card p-4 rounded-xl border border-outline-variant/10">
-            <p className="text-xs font-bold uppercase text-on-surface-variant mb-1">Venue</p>
-            <p className="text-base text-on-surface">{event.location_name}</p>
+          <div className="clay-card p-5 border border-outline-variant/10 text-center flex flex-col justify-center items-center">
+            <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1 tracking-widest">Venue</p>
+            <p className="text-base text-on-surface font-headline font-bold text-primary">{event.location_name}</p>
           </div>
-          <div className="prestige-card p-4 rounded-xl border border-outline-variant/10">
-            <p className="text-xs font-bold uppercase text-on-surface-variant mb-1">Max Guests</p>
-            <p className="text-base text-on-surface">{event.max_guests ?? 'Unlimited'}</p>
+          <div className="clay-card p-5 border border-outline-variant/10 text-center flex flex-col justify-center items-center">
+            <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1 tracking-widest">Max Guests</p>
+            <p className="text-lg text-primary font-headline font-bold">{event.max_guests ?? 'Unlimited'}</p>
           </div>
         </div>
       </div>
 
       {/* Sidebar Actions */}
       <div className="space-y-4">
-        <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-3">
-          <p className="font-headline font-bold text-primary text-sm">Quick Actions</p>
+        <div className="clay-card p-8 border border-outline-variant/10 space-y-4">
+          <p className="font-headline font-extrabold text-primary text-xl mb-4">Quick Actions</p>
           
           <button
             type="button"
             onClick={handleShareEvent}
-            className="w-full btn-prestige-primary inline-flex items-center justify-center gap-2 text-sm"
+            className="w-full clay-btn-primary inline-flex items-center justify-center gap-2 text-xs h-12"
           >
             <Share2 className="w-4 h-4" />
             Share Event
           </button>
-          {shareFeedback && <p className="text-xs text-on-surface-variant text-center">{shareFeedback}</p>}
+          {shareFeedback && <p className="text-xs text-on-surface-variant text-center my-2 font-bold">{shareFeedback}</p>}
 
           <Link
             href={`/events/${eventId}`}
-            className="w-full text-center btn-prestige-secondary inline-flex items-center justify-center gap-2 text-sm"
+            className="w-full text-center clay-btn-secondary inline-flex items-center justify-center gap-2 text-xs h-12"
           >
-            View Public Page
+            Preview Run
           </Link>
 
           <button
@@ -315,6 +328,7 @@ function GuestsTab({ event }: { event: EventDetails }) {
   const [bulkInput, setBulkInput] = useState('')
   const [inviteLoading, setInviteLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState('')
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const eventId = event.id
 
@@ -406,6 +420,7 @@ function GuestsTab({ event }: { event: EventDetails }) {
       toast.success(data.message || 'Guest added successfully.')
       setInviteForm({ full_name: '', phone: '' })
       setBulkInput('')
+      setIsDrawerOpen(false)
       fetchGuests()
     } catch (err) {
       console.error('Invite failed:', err)
@@ -511,19 +526,26 @@ function GuestsTab({ event }: { event: EventDetails }) {
 
   return (
     <div className="grid grid-cols-1 gap-6">
-      <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-5">
+      <div className="clay-card p-6 space-y-5">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4">
           <div>
             <h3 className="font-headline text-lg font-bold text-primary">Add & Manage Guests</h3>
-            <p className="text-on-surface-variant mt-1">Add and manage this event&apos;s RSVP list directly.</p>
+            <p className="text-on-surface-variant mt-1 font-sans">Add and manage this event&apos;s RSVP list.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              className="px-4 py-2 rounded-lg bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed text-sm font-bold transition-all"
+              className="clay-btn-secondary px-6 h-10 py-0 text-xs shadow-none flex items-center justify-center"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              <UserPlus className="w-4 h-4 mr-2" /> Add Guests
+            </button>
+            <button
+              type="button"
+              className="clay-btn-primary px-6 h-10 py-0 text-xs shadow-none flex items-center justify-center"
               onClick={shareWhatsApp}
             >
-              WhatsApp Share
+              <Share2 className="w-4 h-4 mr-2" /> WhatsApp Share
             </button>
           </div>
         </div>
@@ -548,9 +570,13 @@ function GuestsTab({ event }: { event: EventDetails }) {
         {actionMessage && <p className="mt-4 text-xs text-on-surface-variant bg-surface-container-low rounded-lg px-3 py-2 inline-block">{actionMessage}</p>}
       </div>
 
-      <div className="prestige-card p-6 rounded-xl border border-outline-variant/10">
-        <h4 className="font-headline text-base font-bold mb-3">Add Guest(s)</h4>
-        <form onSubmit={handleInvite} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title="Invite Guest(s)"
+        position="right"
+      >
+        <form onSubmit={handleInvite} className="space-y-6">
           <div className="space-y-1">
             <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Guest Name</label>
             <input
@@ -602,15 +628,15 @@ function GuestsTab({ event }: { event: EventDetails }) {
               onChange={(e) => setBulkInput(e.target.value)}
             />
           </div>
-          <div className="md:col-span-2 flex justify-end">
-            <button type="submit" className="btn-prestige-primary px-8" disabled={inviteLoading}>
+          <div className="flex justify-end pt-4">
+            <button type="submit" className="clay-btn-primary px-8 h-12 text-xs" disabled={inviteLoading}>
               {inviteLoading ? 'Processing...' : bulkInput.trim() ? 'Add Bulk Guests' : 'Add Single Guest'}
             </button>
           </div>
         </form>
-      </div>
+      </Drawer>
 
-      <div className="prestige-card p-6 rounded-xl border border-outline-variant/10">
+      <div className="clay-card p-8">
         <h4 className="font-headline text-base font-bold mb-4">Guest List</h4>
 
         {guestsLoading ? (
@@ -686,10 +712,10 @@ function GuestsTab({ event }: { event: EventDetails }) {
 
 function EditTab({ event, eventId }: { event: EventDetails; eventId: string }) {
   return (
-    <div className="prestige-card p-6 rounded-xl border border-outline-variant/10">
+    <div className="clay-card p-8 space-y-6">
       <div className="mb-6">
-        <h3 className="font-headline font-bold text-primary text-lg mb-1">Event Editor</h3>
-        <p className="text-on-surface-variant">Edit event details and update the poster image.</p>
+        <h3 className="font-headline font-bold text-primary text-xl mb-1">Event Editor</h3>
+        <p className="text-on-surface-variant font-sans">Edit event details and update the poster image.</p>
       </div>
       <EventEditForm event={event} eventId={eventId} onSuccess={() => window.location.href = `/dashboard/events/hub/${eventId}`} />
     </div>
@@ -876,10 +902,10 @@ function AnalyticsTab() {
         { label: 'RSVP Velocity', value: '68%', note: 'Expected within first 72 hours' },
         { label: 'Gate Throughput', value: '92/hr', note: 'Estimated check-in speed' },
       ].map((item) => (
-        <div key={item.label} className="prestige-card p-6 rounded-xl border border-outline-variant/10">
+        <div key={item.label} className="clay-card p-8 flex flex-col justify-between">
           <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2">{item.label}</p>
-          <p className="text-3xl font-headline font-extrabold text-primary mb-1">{item.value}</p>
-          <p className="text-sm text-on-surface-variant">{item.note}</p>
+          <p className="text-4xl font-headline font-extrabold text-primary mb-1">{item.value}</p>
+          <p className="text-sm text-on-surface-variant font-sans">{item.note}</p>
         </div>
       ))}
     </div>
@@ -888,13 +914,13 @@ function AnalyticsTab() {
 
 function SettingsTab() {
   return (
-    <div className="prestige-card p-6 rounded-xl border border-outline-variant/10 space-y-3">
-      <p className="font-headline font-bold text-primary text-lg">Event Controls</p>
+    <div className="clay-card p-8 space-y-4">
+      <p className="font-headline font-bold text-primary text-xl mb-2">Event Controls</p>
       {['Public visibility', 'Registration mode', 'Guest status defaults', 'Reminder presets'].map((item) => (
         <button
           key={item}
           type="button"
-          className="w-full text-left px-4 py-3 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface text-sm font-medium"
+          className="w-full text-left px-5 py-4 rounded-[1.5rem] bg-surface-container-low hover:bg-surface-container-high text-on-surface text-sm font-bold font-sans transition-all border border-outline-variant/10"
         >
           {item}
         </button>
