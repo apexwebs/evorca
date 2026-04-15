@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'react-hot-toast'
 import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus } from 'lucide-react'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { Html5Qrcode } from 'html5-qrcode'
 import EventEditForm from '@/components/EventEditForm'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Drawer } from '@/components/ui/Drawer'
@@ -189,10 +189,10 @@ export default function EventHubPage() {
           <EditTab event={event} eventId={eventId as string} />
         )}
         {activeTab === 'analytics' && (
-          <AnalyticsTab />
+          <AnalyticsTab eventId={eventId as string} />
         )}
         {activeTab === 'settings' && (
-          <SettingsTab />
+          <SettingsTab event={event} />
         )}
       </div>
     </div>
@@ -328,7 +328,8 @@ function GuestsTab({ event }: { event: EventDetails }) {
   const [bulkInput, setBulkInput] = useState('')
   const [inviteLoading, setInviteLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState('')
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showBulk, setShowBulk] = useState(false)
 
   const eventId = event.id
 
@@ -387,11 +388,11 @@ function GuestsTab({ event }: { event: EventDetails }) {
           return { full_name, phone }
         })
 
-      const payload = parsedBulkGuests.length > 0
+      const payload = showBulk && parsedBulkGuests.length > 0
         ? { guests: parsedBulkGuests }
         : { full_name: inviteForm.full_name.trim(), phone: inviteForm.phone.trim() }
 
-      const guestsToValidate = parsedBulkGuests.length > 0
+      const guestsToValidate = showBulk && parsedBulkGuests.length > 0
         ? parsedBulkGuests
         : [{ full_name: inviteForm.full_name.trim(), phone: inviteForm.phone.trim() }]
 
@@ -420,7 +421,8 @@ function GuestsTab({ event }: { event: EventDetails }) {
       toast.success(data.message || 'Guest added successfully.')
       setInviteForm({ full_name: '', phone: '' })
       setBulkInput('')
-      setIsDrawerOpen(false)
+      setShowBulk(false)
+      setIsModalOpen(false)
       fetchGuests()
     } catch (err) {
       console.error('Invite failed:', err)
@@ -446,14 +448,11 @@ function GuestsTab({ event }: { event: EventDetails }) {
         throw new Error(data.error || 'Failed to update guest status')
       }
 
-      setActionMessage(`Guest updated: ${status}`)
       toast.success(`Guest updated: ${status}`)
       fetchGuests()
     } catch (err) {
       console.error('Update guest status failed:', err)
-      const message = (err as Error).message || 'Failed to update guest status'
-      setActionMessage(message)
-      toast.error(message)
+      toast.error((err as Error).message || 'Failed to update guest status')
     }
   }
 
@@ -472,14 +471,11 @@ function GuestsTab({ event }: { event: EventDetails }) {
         throw new Error(data.error || 'Failed to remove guest')
       }
 
-      setActionMessage('Guest removed successfully')
       toast.success('Guest removed successfully')
       fetchGuests()
     } catch (err) {
       console.error('Remove guest failed:', err)
-      const message = (err as Error).message || 'Could not remove guest'
-      setActionMessage(message)
-      toast.error(message)
+      toast.error((err as Error).message || 'Could not remove guest')
     }
   }
 
@@ -496,7 +492,6 @@ function GuestsTab({ event }: { event: EventDetails }) {
       `${greeting}\n\nWe are delighted to share your exclusive digital pass for *${event.title}*.\n\nAccess your pass here:\n${passUrl}`,
     )
     if (phone) {
-      // Remove any non-digits from the phone number for the wa.me link
       const cleanPhone = phone.replace(/\D/g, '')
       window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank')
     } else {
@@ -530,13 +525,13 @@ function GuestsTab({ event }: { event: EventDetails }) {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4">
           <div>
             <h3 className="font-headline text-lg font-bold text-primary">Add & Manage Guests</h3>
-            <p className="text-on-surface-variant mt-1 font-sans">Add and manage this event&apos;s RSVP list.</p>
+            <p className="text-on-surface-variant mt-1 font-sans">Curate your exclusive attendee list.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               className="clay-btn-secondary px-6 h-10 py-0 text-xs shadow-none flex items-center justify-center"
-              onClick={() => setIsDrawerOpen(true)}
+              onClick={() => setIsModalOpen(true)}
             >
               <UserPlus className="w-4 h-4 mr-2" /> Add Guests
             </button>
@@ -570,132 +565,145 @@ function GuestsTab({ event }: { event: EventDetails }) {
         {actionMessage && <p className="mt-4 text-xs text-on-surface-variant bg-surface-container-low rounded-lg px-3 py-2 inline-block">{actionMessage}</p>}
       </div>
 
-      <Drawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        title="Invite Guest(s)"
-        position="right"
-      >
-        <form onSubmit={handleInvite} className="space-y-6">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Guest Name</label>
-            <input
-              type="text"
-              className="form-input w-full"
-              placeholder="e.g. John Doe"
-              value={inviteForm.full_name}
-              onChange={(e) => setInviteForm(prev => ({ ...prev, full_name: e.target.value }))}
-              required={bulkInput.trim().length === 0}
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Phone Number</label>
-            <input
-              type="tel"
-              className="form-input w-full font-mono tracking-wider"
-              placeholder="+254 7XX XXX XXX"
-              value={inviteForm.phone}
-              required={bulkInput.trim().length === 0}
-              onChange={(e) => {
-                let val = e.target.value.replace(/[^\d+]/g, '') // Keep only digits and +
-                
-                // If user starts with 0, replace with +254
-                if (val.startsWith('0')) {
-                  val = '+254' + val.slice(1)
-                } 
-                // If it starts with 7 or 1 (and no +), prepend +254
-                else if ((val.startsWith('7') || val.startsWith('1')) && !val.includes('+')) {
-                  val = '+254' + val
-                }
-                // If it starts with 254 (and no +), prepend +
-                else if (val.startsWith('254') && !val.includes('+')) {
-                  val = '+' + val
-                }
-                
-                // Kenya numbers are max +254 + 9 digits = 13 chars
-                if (val.length <= 13) {
-                  setInviteForm(prev => ({ ...prev, phone: val }))
-                }
-              }}
-            />
-          </div>
-          <div className="md:col-span-2 space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Bulk Add (Optional)</label>
-            <textarea
-              className="form-input w-full min-h-28 text-sm"
-              placeholder={'Format: Name, Phone (one per line)\ne.g. Jane Doe, +254 712 345 678'}
-              value={bulkInput}
-              onChange={(e) => setBulkInput(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end pt-4">
-            <button type="submit" className="clay-btn-primary px-8 h-12 text-xs" disabled={inviteLoading}>
-              {inviteLoading ? 'Processing...' : bulkInput.trim() ? 'Add Bulk Guests' : 'Add Single Guest'}
-            </button>
-          </div>
-        </form>
-      </Drawer>
+      {/* Guest Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-surface w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-outline-variant/20 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
+              <h3 className="font-headline font-extrabold text-primary text-xl tracking-tight">Invite Guests</h3>
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="text-on-surface-variant hover:text-error text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div className="p-8">
+              <form onSubmit={handleInvite} className="space-y-6">
+                <div className="flex justify-end items-center gap-3">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Bulk Registration Mode</span>
+                  <button 
+                    type="button"
+                    onClick={() => setShowBulk(!showBulk)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${showBulk ? 'bg-primary' : 'bg-outline-variant/30'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showBulk ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                </div>
 
-      <div className="clay-card p-8">
-        <h4 className="font-headline text-base font-bold mb-4">Guest List</h4>
+                {!showBulk ? (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Guest Name</label>
+                      <input
+                        type="text"
+                        className="form-input w-full h-12"
+                        placeholder="e.g. John Doe"
+                        value={inviteForm.full_name}
+                        onChange={(e) => setInviteForm(prev => ({ ...prev, full_name: e.target.value }))}
+                        required={!showBulk}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        className="form-input w-full h-12 font-mono tracking-wider"
+                        placeholder="+254 7XX XXX XXX"
+                        value={inviteForm.phone}
+                        required={!showBulk}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/[^\d+]/g, '')
+                          if (val.startsWith('0')) val = '+254' + val.slice(1)
+                          else if ((val.startsWith('7') || val.startsWith('1')) && !val.includes('+')) val = '+254' + val
+                          else if (val.startsWith('254') && !val.includes('+')) val = '+' + val
+                          if (val.length <= 13) setInviteForm(prev => ({ ...prev, phone: val }))
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Paste Guest List</label>
+                    <textarea
+                      className="form-input w-full min-h-[160px] text-sm"
+                      placeholder={'Format: Name, Phone (one per line)\ne.g. Jane Doe, +254 712 345 678'}
+                      value={bulkInput}
+                      onChange={(e) => setBulkInput(e.target.value)}
+                      required={showBulk}
+                    />
+                  </div>
+                )}
+                
+                <div className="pt-4">
+                  <button type="submit" className="clay-btn-primary w-full h-14 text-xs font-bold" disabled={inviteLoading}>
+                    {inviteLoading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mx-auto" /> : (showBulk ? 'Add Bulk Guests' : 'Add Single Guest')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="clay-card p-6 sm:p-8">
+        <h4 className="font-headline text-lg font-bold mb-4 text-primary">Exclusive Guest List</h4>
 
         {guestsLoading ? (
-          <p className="text-on-surface-variant">Loading guests...</p>
+          <p className="text-on-surface-variant text-sm font-medium animate-pulse">Loading prestigious guests...</p>
         ) : guestsError ? (
-          <p className="text-error">{guestsError}</p>
+          <p className="text-error text-sm font-medium">{guestsError}</p>
         ) : guests.length === 0 ? (
-          <p className="text-on-surface-variant">No guests invited yet. Add guests using the form above.</p>
+          <div className="py-8 text-center border-2 border-dashed border-outline-variant/10 rounded-[2rem]">
+            <p className="text-on-surface-variant/50 font-bold uppercase tracking-widest text-xs">No entries. Invite your first guest.</p>
+          </div>
         ) : (
           <div className="space-y-3">
             {guests.map((guest) => {
               const passUrl = `${eventUrl}?ticket=${guest.ticket_code}`
               return (
-                <div key={guest.id} className="prestige-card p-4 rounded-xl border border-outline-variant/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                    <div className="bg-white p-2 rounded-lg shrink-0">
-                      <QRCodeSVG value={passUrl} size={80} level="H" bgColor="#ffffff" fgColor="#0f172a" />
-                    </div>
-                    <div>
-                      <p className="font-headline font-bold text-primary text-base">{guest.full_name || 'No name'}</p>
-                      <p className="text-sm text-on-surface-variant font-medium">{guest.phone ? guest.phone : 'No phone'}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${statusTone[guest.status]}`}>
-                          {guest.status.replace('_', ' ')}
-                        </span>
-                      </div>
-                    </div>
+                <div key={guest.id} className="group p-4 rounded-2xl bg-surface border border-outline-variant/10 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/20 transition-all hover:shadow-sm">
+                  <div className="flex flex-col">
+                    <p className="font-headline font-extrabold text-primary text-base truncate">{guest.full_name || 'Anonymous Entry'}</p>
+                    <p className="text-xs text-on-surface-variant font-mono mt-0.5 tracking-wider">{guest.phone ? guest.phone : 'No Phone Provided'}</p>
                   </div>
                   
-                  <div className="flex gap-2 mt-2 md:mt-0 flex-wrap justify-end">
+                  <div className="flex items-center gap-3 mt-2 md:mt-0 justify-end w-full md:w-auto">
+                    <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest mr-2 ${statusTone[guest.status]}`}>
+                      {guest.status.replace('_', ' ')}
+                    </div>
+                    
                     <button
                       type="button"
-                      className="btn-prestige-secondary text-xs py-1.5 px-3"
+                      className="text-on-surface-variant hover:text-primary transition-colors p-2"
                       onClick={() => shareWhatsAppPass(guest.phone, passUrl, guest.full_name || undefined)}
+                      title="Share Pass"
                     >
-                      <Share2 className="w-3 h-3 mr-1 inline" />
-                      Invite
+                      <Share2 className="w-4 h-4" />
                     </button>
-
-                    <div className="h-6 w-[1px] bg-outline-variant/30 hidden sm:block mx-1 self-center" />
-
-                    {['invited', 'confirmed', 'checked_in'].map((status) => (
-                      <button
-                        key={status}
-                        className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-lg transition-all ${
-                          guest.status === status 
-                            ? statusTone[status as Guest['status']] 
-                            : 'bg-surface-container-low text-on-surface-variant/60 hover:text-primary hover:bg-surface-container-high'
-                        }`}
-                        onClick={() => updateGuestStatus(guest.id, status as Guest['status'])}
-                      >
-                        {status.split('_')[0]}
+                    
+                    <div className="relative group/menu">
+                      <button className="text-on-surface-variant hover:text-primary transition-colors p-2">
+                        <Edit className="w-4 h-4" />
                       </button>
-                    ))}
+                      <div className="absolute right-0 top-full mt-2 w-32 bg-surface rounded-xl shadow-xl border border-outline-variant/10 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 flex flex-col py-1">
+                        {['invited', 'confirmed', 'checked_in', 'declined'].map((status) => (
+                          <button
+                            key={status}
+                            className={`text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-surface-container-low ${guest.status === status ? 'text-primary bg-primary/5' : 'text-on-surface'}`}
+                            onClick={() => updateGuestStatus(guest.id, status as Guest['status'])}
+                          >
+                            Mark {status.replace('_', ' ')}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     
                     <button 
-                      className="p-1.5 rounded-lg border border-error/20 text-error hover:bg-error/5 transition-all ml-1" 
+                      className="p-2 text-on-surface-variant/50 hover:text-error transition-colors" 
                       onClick={() => removeGuest(guest.id)}
-                      title="Remove guest"
+                      title="Remove from list"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -727,36 +735,7 @@ function ScanTab({ eventId }: { eventId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [resultMessage, setResultMessage] = useState('')
   const [resultError, setResultError] = useState('')
-  const [isScannerActive, setIsScannerActive] = useState(false)
-
-  useEffect(() => {
-    let scanner: Html5QrcodeScanner | null = null
-
-    if (isScannerActive) {
-      scanner = new Html5QrcodeScanner(
-        'qr-reader',
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
-      )
-
-      scanner.render(
-        async (decodedText) => {
-          setTicketCode(decodedText)
-          // Process check-in immediately
-          handleCheckin(null, decodedText)
-        },
-        (error) => {
-          // Silent scan noise
-        }
-      )
-    }
-
-    return () => {
-      if (scanner) {
-        scanner.clear().catch(console.error)
-      }
-    }
-  }, [isScannerActive])
+  const [isScannerActive, setIsScannerActive] = useState(true)
 
   const handleCheckin = async (e: React.FormEvent | null, manualCode?: string) => {
     if (e) e.preventDefault()
@@ -799,6 +778,35 @@ function ScanTab({ eventId }: { eventId: string }) {
     }
   }
 
+  useEffect(() => {
+    let html5QrCode: Html5Qrcode | null = null;
+    let isMounted = true;
+
+    if (isScannerActive && !resultMessage && !resultError && !isSubmitting) {
+      html5QrCode = new Html5Qrcode("qr-reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 15, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          if (isMounted) {
+            setTicketCode(decodedText);
+            handleCheckin(null, decodedText);
+          }
+        },
+        (error) => {}
+      ).catch((err) => {
+        console.warn("Scanner error:", err);
+      });
+    }
+
+    return () => {
+      isMounted = false;
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => html5QrCode!.clear()).catch(console.error);
+      }
+    };
+  }, [isScannerActive, resultMessage, resultError, isSubmitting])
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center space-y-2">
@@ -809,24 +817,10 @@ function ScanTab({ eventId }: { eventId: string }) {
       <div className="max-w-md mx-auto relative group">
         <div className="absolute -inset-4 bg-primary/5 rounded-[3rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
-        <div className="relative overflow-hidden rounded-[2.5rem] border-4 border-primary/20 bg-black shadow-2xl aspect-square flex items-center justify-center">
-          {!isScannerActive ? (
-            <div className="flex flex-col items-center gap-6 p-12 text-center">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary animate-pulse">
-                <ScanLine size={48} />
-              </div>
-              <button
-                onClick={() => setIsScannerActive(true)}
-                className="prestige-button-primary px-10 py-4 rounded-2xl font-bold tracking-widest text-sm"
-              >
-                LAUNCH CAMERA
-              </button>
-            </div>
-          ) : (
-            <div id="qr-reader" className="w-full h-full" />
-          )}
+        <div className="relative overflow-hidden rounded-[2.5rem] border-4 border-primary/20 bg-surface shadow-2xl aspect-square flex items-center justify-center">
+          <div id="qr-reader" className="w-full h-full [&>video]:w-full [&>video]:h-full [&>video]:object-cover" />
 
-          {/* Verification Result Overlay - Visual feedback is now HERO */}
+          {/* Verification Result Overlay */}
           {(resultMessage || resultError) && (
             <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center animate-in zoom-in-95 duration-300 ${resultError ? 'bg-error/95 backdrop-blur-xl' : 'bg-success/95 backdrop-blur-xl'}`}>
               <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-white text-5xl mb-6 shadow-2xl">
@@ -855,14 +849,12 @@ function ScanTab({ eventId }: { eventId: string }) {
 
       <div className="max-w-md mx-auto pt-4">
         <div className="flex flex-col items-center gap-6">
-          {isScannerActive && (
-            <button
-              onClick={() => setIsScannerActive(false)}
-              className="text-on-surface-variant/60 font-bold text-[10px] uppercase tracking-widest hover:text-error transition-colors"
-            >
-              Stop Camera
-            </button>
-          )}
+          <button
+            onClick={() => setIsScannerActive(!isScannerActive)}
+            className="text-on-surface-variant/60 font-bold text-[10px] uppercase tracking-widest hover:text-error transition-colors"
+          >
+            {isScannerActive ? 'Stop Camera' : 'Start Camera'}
+          </button>
 
           <div className="w-full h-px bg-gradient-to-r from-transparent via-outline-variant/20 to-transparent" />
 
@@ -894,37 +886,97 @@ function ScanTab({ eventId }: { eventId: string }) {
   )
 }
 
-function AnalyticsTab() {
+function AnalyticsTab({ eventId }: { eventId: string }) {
+  const [stats, setStats] = useState({ total: 0, checkedIn: 0, confirmed: 0 })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`/api/events/${eventId}/guests`)
+        const data = await res.json()
+        if (res.ok && data.guests) {
+          const guests = data.guests as Guest[]
+          setStats({
+            total: guests.length,
+            checkedIn: guests.filter(g => g.status === 'checked_in').length,
+            confirmed: guests.filter(g => g.status === 'confirmed').length,
+          })
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchStats()
+  }, [eventId])
+
+  if (loading) return <div className="text-on-surface-variant animate-pulse p-4">Aggregating Insights...</div>
+
+  const completionRate = stats.total > 0 ? Math.round((stats.checkedIn / stats.total) * 100) : 0;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {[
-        { label: 'Invite Reach', value: '2.4k', note: 'Projected campaign impressions' },
-        { label: 'RSVP Velocity', value: '68%', note: 'Expected within first 72 hours' },
-        { label: 'Gate Throughput', value: '92/hr', note: 'Estimated check-in speed' },
-      ].map((item) => (
-        <div key={item.label} className="clay-card p-8 flex flex-col justify-between">
-          <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2">{item.label}</p>
-          <p className="text-4xl font-headline font-extrabold text-primary mb-1">{item.value}</p>
-          <p className="text-sm text-on-surface-variant font-sans">{item.note}</p>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="clay-card p-8 flex flex-col justify-between hover:border-primary/20 transition-all">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70 mb-2">Total RSVPs</p>
+        <p className="text-5xl font-headline font-extrabold text-primary mb-1">{stats.total}</p>
+        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-2">Invited Guests</p>
+      </div>
+      <div className="clay-card p-8 flex flex-col justify-between hover:border-primary/20 transition-all">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/70 mb-2">Confirmed</p>
+        <p className="text-5xl font-headline font-extrabold text-secondary mb-1">{stats.confirmed}</p>
+        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-2">Ready to attend</p>
+      </div>
+      <div className="clay-card p-8 flex flex-col justify-between hover:border-primary/20 transition-all">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70 mb-2">Gate Completion</p>
+        <p className="text-5xl font-headline font-extrabold text-primary mb-1">{completionRate}%</p>
+        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-2">{stats.checkedIn} Checked-in</p>
+      </div>
     </div>
   )
 }
 
-function SettingsTab() {
+function SettingsTab({ event }: { event: EventDetails }) {
   return (
-    <div className="clay-card p-8 space-y-4">
-      <p className="font-headline font-bold text-primary text-xl mb-2">Event Controls</p>
-      {['Public visibility', 'Registration mode', 'Guest status defaults', 'Reminder presets'].map((item) => (
-        <button
-          key={item}
-          type="button"
-          className="w-full text-left px-5 py-4 rounded-[1.5rem] bg-surface-container-low hover:bg-surface-container-high text-on-surface text-sm font-bold font-sans transition-all border border-outline-variant/10"
-        >
-          {item}
-        </button>
-      ))}
+    <div className="space-y-6">
+      <div className="clay-card p-8 border border-primary/20 bg-surface-container-low">
+        <h3 className="font-headline font-bold text-primary text-xl mb-4">Payment & Ticketing Details</h3>
+        <p className="text-sm text-on-surface-variant mb-6 font-sans">Configure M-Pesa integration for ticket sales. Transactions will be routed to your Till/Paybill.</p>
+        
+        <div className="space-y-4 max-w-lg">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">M-Pesa Business Number</label>
+            <input type="text" className="form-input w-full h-12" placeholder="Paybill or Till Number (e.g. 123456)" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Account Component</label>
+            <input type="text" className="form-input w-full h-12" placeholder="Account Name (e.g. EVORCA)" />
+          </div>
+          <button className="clay-btn-primary px-8 h-12 text-xs font-bold w-full sm:w-auto">
+            Save Payment Settings
+          </button>
+        </div>
+      </div>
+
+      <div className="clay-card p-8 space-y-4">
+        <p className="font-headline font-bold text-primary text-xl mb-2">Advanced Controls</p>
+        <div className="space-y-3">
+          {[
+            { label: 'Public Visibility', desc: event.is_public ? 'Event is currently public' : 'Event is currently private' },
+            { label: 'Registration Mode', desc: 'Auto-approve RSVPs or require manual review' },
+            { label: 'WhatsApp Reminders', desc: 'Send automated reminders 24h prior' }
+          ].map((item) => (
+            <div key={item.label} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-[1.5rem] bg-surface-container-low border border-outline-variant/10">
+              <div>
+                <p className="text-sm font-bold font-headline text-primary">{item.label}</p>
+                <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-1">{item.desc}</p>
+              </div>
+              <button className="btn-prestige-secondary px-4 py-2 text-xs mt-3 sm:mt-0">Configure</button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

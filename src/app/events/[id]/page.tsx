@@ -271,72 +271,82 @@ export default function PublicEventPage() {
         <div className="absolute top-[40%] left-[-20%] w-[60vh] h-[60vh] bg-primary/20 blur-[120px] rounded-full animate-pulse delay-700 mix-blend-multiply" />
       </div>
 
-      {/* 1. Cinematic Hero Section */}
-      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
-        {/* Full-Screen Poster Background with Blur for Claymorphism */}
-        <div className="absolute inset-0 z-0 opacity-80 backdrop-blur-[60px]">
-          {event.poster_url ? (
-            <img 
-              src={event.poster_url} 
-              alt={event.title}
-              className="w-full h-full object-cover blur-[50px] scale-110 opacity-30 animate-in fade-in duration-[2000ms]"
-            />
-          ) : (
-            <div className="w-full h-full bg-surface-container" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" />
+      {/* 1. Cinematic Hero Section - Split Layout */}
+      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden pt-20 pb-10">
+        {/* Subtle Background */}
+        <div className="absolute inset-0 z-0 opacity-40">
+          <div className="w-full h-full bg-surface-container" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-6 text-center space-y-10 max-w-5xl mt-20">
-          <div className="animate-in fade-in slide-in-from-top-12 duration-1000">
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/60 border border-white/80 shadow-md backdrop-blur-md mb-8">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary font-headline">By Invitation Only</span>
-            </div>
+        {/* Hero Content - Split Layout */}
+        <div className="relative z-10 container mx-auto px-6 max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             
-            <h1 className="text-6xl sm:text-8xl lg:text-9xl font-headline font-extrabold tracking-tight text-primary uppercase leading-[0.9] drop-shadow-xl p-4">
-              {event.title}
-            </h1>
-          </div>
+            {/* Left: Text & Actions */}
+            <div className="text-left space-y-8 animate-in fade-in slide-in-from-left-12 duration-1000">
+              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/60 border border-white/80 shadow-sm backdrop-blur-md">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary font-headline">By Invitation Only</span>
+              </div>
+              
+              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-headline font-extrabold tracking-tight text-primary uppercase leading-[0.9] drop-shadow-sm">
+                {event.title}
+              </h1>
 
-          <div className="flex flex-wrap items-start justify-center gap-6 sm:gap-10 pt-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-            <div className="clay-card p-6 flex flex-col items-center gap-3 w-40">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                <Calendar className="w-4 h-4" />
+              <div className="flex flex-wrap items-center gap-6 pt-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shadow-inner">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Schedule</p>
+                    <p className="text-xs font-bold uppercase text-primary mt-0.5">{eventDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-outline-variant/30 hidden sm:block" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shadow-inner">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Venue</p>
+                    <p className="text-xs font-bold uppercase text-primary mt-0.5 max-w-[150px] truncate" title={event.location_name}>{event.location_name}</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Schedule</p>
-                <p className="text-xs font-bold uppercase text-primary mt-1">{eventDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+              
+              <div className="pt-8">
+                <a 
+                  href="#rsvp" 
+                  className="clay-btn-primary inline-flex h-14 px-12 text-[11px] items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all"
+                >
+                  Request Entry Access
+                </a>
               </div>
             </div>
-            <div className="clay-card p-6 flex flex-col items-center gap-3 w-40">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                <MapPin className="w-4 h-4" />
-              </div>
-              <div className="text-center">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Venue</p>
-                <p className="text-xs font-bold uppercase text-primary mt-1 truncate w-full">{event.location_name}</p>
+
+            {/* Right: Poster Card */}
+            <div className="animate-in fade-in slide-in-from-right-12 duration-1000 delay-300">
+              <div className="relative w-full aspect-[4/5] max-w-md mx-auto lg:ml-auto rounded-[3rem] p-4 bg-white/40 border border-white/60 shadow-2xl backdrop-blur-xl rotate-2 hover:rotate-0 transition-transform duration-700">
+                <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-surface-container relative">
+                  {event.poster_url ? (
+                    <img 
+                      src={event.poster_url} 
+                      alt={event.title}
+                      className="w-full h-full object-cover rounded-[2.5rem]"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
+                      <p className="text-on-surface-variant/40 font-bold uppercase tracking-widest text-xs">Event Prestige</p>
+                    </div>
+                  )}
+                  {/* Subtle Inner Shadow for Clay effect */}
+                  <div className="absolute inset-0 rounded-[2.5rem] shadow-[inset_0_20px_40px_rgba(0,0,0,0.1)] pointer-events-none" />
+                </div>
               </div>
             </div>
-            <div className="clay-card p-6 flex flex-col items-center gap-3 w-40">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                <Shirt className="w-4 h-4" />
-              </div>
-              <div className="text-center">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant font-headline">Attire</p>
-                <p className="text-xs font-bold uppercase text-primary mt-1 truncate w-full">{event.dress_code || 'Elite'}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="pt-16">
-            <a 
-              href="#rsvp" 
-              className="clay-btn-primary inline-flex h-14 px-12 text-[11px] items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
-            >
-              Request Entry Access
-            </a>
+
           </div>
         </div>
       </section>

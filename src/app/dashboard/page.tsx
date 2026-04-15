@@ -57,11 +57,14 @@ export default function Dashboard() {
   const activeEvents = events.filter(event => event.status === 'published').length
   const totalGuests = events.reduce((sum, event) => sum + (event.max_guests || 0), 0)
 
+  const guestsTotalCount = checkIns > 0 ? Math.max(checkIns, totalGuests) : totalGuests;
+  const conversionRate = guestsTotalCount > 0 ? Math.round((checkIns / guestsTotalCount) * 100) + '%' : '0%';
+
   const stats = [
     { label: 'Active Events', value: activeEvents.toString(), icon: Calendar, color: 'text-primary' },
     { label: 'Total Guests', value: totalGuests.toString(), icon: Users, color: 'text-secondary' },
     { label: 'Check-ins', value: checkIns.toString(), icon: QrCode, color: 'text-primary' },
-    { label: 'Conversion', value: '0%', icon: TrendingUp, color: 'text-secondary' },
+    { label: 'Conversion', value: conversionRate, icon: TrendingUp, color: 'text-secondary' },
   ]
 
   return (
