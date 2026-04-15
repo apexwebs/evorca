@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { PostgrestError } from '@supabase/supabase-js'
-import { createServiceRoleClient } from '@/lib/supabase/server'
+import { createServiceRoleClient, createClient } from '@/lib/supabase/server'
 
 /**
  * SECURITY WARNING: 
