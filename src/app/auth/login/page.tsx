@@ -4,6 +4,7 @@ import { Mail, ArrowRight, Lock, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,23 +19,28 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed')
+      const supabase = createClient()
+      if (!supabase) {
+        setError('Unable to connect to authentication service.')
         return
       }
 
-      // Login successful - redirect to dashboard
-      router.push('/dashboard')
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        setError(error.message)
+        return
+      }
+
+      if (data.session?.user) {
+        router.push('/dashboard')
+        return
+      }
+
+      setError('Login succeeded but session was not established. Please refresh and try again.')
     } catch (error) {
       console.error('Login request error:', error)
       setError('Network error. Please try again.')

@@ -1,6 +1,12 @@
 -- EVORCA PRESTIGE - DATABASE SCHEMA (Supabase/Postgres)
 -- Phase 1: Foundation MVP
 
+-- CRITICAL NOTE: Supabase Auth (auth.users) is SEPARATE from custom tables
+-- Deleting a row from profiles does NOT delete the auth user
+-- Deleting an auth user DOES cascade-delete the profile row (ON DELETE CASCADE)
+-- Always delete via auth.admin.deleteUser() or the Supabase Auth UI, not via custom table rows
+
+
 -- 1. PROFILES (Extension of Supabase Auth)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
@@ -126,6 +132,12 @@ DROP POLICY IF EXISTS "Organisers can delete their own events" ON public.events;
 CREATE POLICY "Organisers can delete their own events" ON public.events FOR DELETE USING (
   created_by = auth.uid() OR
   org_id IN (SELECT id FROM public.organisations WHERE owner_id = auth.uid())
+);
+
+-- Public read access for published public events
+DROP POLICY IF EXISTS "Public can view published public events" ON public.events;
+CREATE POLICY "Public can view published public events" ON public.events FOR SELECT USING (
+  status = 'published' AND is_public = true
 );
 
 -- Guests

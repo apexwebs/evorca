@@ -31,6 +31,8 @@ export default function ToolsPage() {
   const router = useRouter()
   const { user, signOut } = useAuth()
   const [authActionLoading, setAuthActionLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [accountMessage, setAccountMessage] = useState('')
 
   const handleLogout = async () => {
     setAuthActionLoading(true)
@@ -39,6 +41,35 @@ export default function ToolsPage() {
       router.push('/auth/login')
     } finally {
       setAuthActionLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'Delete account permanently? This removes your user profile and signs you out.'
+    )
+    if (!confirmed) return
+
+    setDeleteLoading(true)
+    setAccountMessage('')
+
+    try {
+      const response = await fetch('/api/auth/delete', { method: 'POST' })
+      const data = await response.json()
+
+      if (!response.ok) {
+        setAccountMessage(data.error || 'Unable to delete account.')
+        return
+      }
+
+      setAccountMessage('Account deleted. Signing out...')
+      await signOut()
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Account deletion error:', error)
+      setAccountMessage('Unable to delete account. Please try again.')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -199,17 +230,31 @@ export default function ToolsPage() {
                 </button>
               ))}
             </div>
-            <div className="pt-2">
+            <div className="pt-2 space-y-3">
               {user ? (
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 h-12 rounded-[1.5rem] bg-error/10 text-error font-bold uppercase tracking-widest text-[10px] hover:bg-error/20 transition-all border border-error/20 shadow-sm"
-                  onClick={handleLogout}
-                  disabled={authActionLoading}
-                >
-                  <LogOut className="w-4 h-4" />
-                  {authActionLoading ? 'Terminating Session...' : 'Terminate Session'}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 h-12 rounded-[1.5rem] bg-error/10 text-error font-bold uppercase tracking-widest text-[10px] hover:bg-error/20 transition-all border border-error/20 shadow-sm"
+                    onClick={handleLogout}
+                    disabled={authActionLoading || deleteLoading}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {authActionLoading ? 'Terminating Session...' : 'Terminate Session'}
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 h-12 rounded-[1.5rem] bg-error/95 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-error transition-all shadow-sm"
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading || authActionLoading}
+                  >
+                    <Shield className="w-4 h-4" />
+                    {deleteLoading ? 'Deleting Account...' : 'Delete Account'}
+                  </button>
+                  {accountMessage && (
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">{accountMessage}</p>
+                  )}
+                </>
               ) : (
                 <button
                   type="button"

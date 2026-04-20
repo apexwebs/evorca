@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { 
   Calendar, 
   MapPin, 
@@ -15,7 +16,8 @@ import {
   Shirt,
   Info,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Copy
 } from 'lucide-react'
 
 interface PublicEventDetails {
@@ -45,6 +47,7 @@ export default function PublicEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [registrationSuccess, setRegistrationSuccess] = useState('')
   const [ticketCode, setTicketCode] = useState('')
+  const [copyStatus, setCopyStatus] = useState('')
   const [guest, setGuest] = useState<any>(null)
   const [formData, setFormData] = useState({
     full_name: '',
@@ -122,12 +125,38 @@ export default function PublicEventPage() {
 
       setRegistrationSuccess(data.message)
       setTicketCode(data.ticket_code || '')
+      
+      // Fetch guest data to display QR pass
+      if (data.ticket_code) {
+        try {
+          const guestRes = await fetch(`/api/events/${eventId}/guests?ticket=${data.ticket_code}`)
+          const guestData = await guestRes.json()
+          if (guestRes.ok && guestData.guest) {
+            setGuest(guestData.guest)
+          }
+        } catch (err) {
+          console.error('Failed to fetch guest data after registration:', err)
+        }
+      }
+      
       setFormData({ full_name: '', phone: '' })
     } catch (error) {
       console.error('Registration failed:', error)
       setError('Network error during registration')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleCopyPassLink = async () => {
+    if (!eventId || !ticketCode) return
+    const passUrl = `${window.location.origin}/events/${eventId}?ticket=${ticketCode}`
+    try {
+      await navigator.clipboard.writeText(passUrl)
+      setCopyStatus('Link copied to clipboard')
+      window.setTimeout(() => setCopyStatus(''), 2000)
+    } catch {
+      setCopyStatus('Unable to copy. Please screenshot the QR.')
     }
   }
 
@@ -210,6 +239,21 @@ export default function PublicEventPage() {
                 )}
               </div>
               <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-[0.3em] font-headline">Scan at checkpoint</p>
+
+              <div className="mt-6 flex flex-col gap-3 text-center">
+                <button
+                  type="button"
+                  onClick={handleCopyPassLink}
+                  className="clay-btn-secondary w-full h-12 text-xs flex items-center justify-center gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy pass link
+                </button>
+                {copyStatus && (
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-[0.3em] font-bold">{copyStatus}</p>
+                )}
+                <p className="text-[10px] text-on-surface-variant uppercase tracking-[0.3em] font-bold">Save or screenshot this QR pass before arrival.</p>
+              </div>
             </div>
 
             {/* Logistics Grid */}
@@ -281,6 +325,8 @@ export default function PublicEventPage() {
 
         {/* Hero Content - Split Layout */}
         <div className="relative z-10 container mx-auto px-6 max-w-7xl">
+          <Breadcrumb items={[{ label: 'Events', href: '/events' }, { label: event.title }]} />
+          
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             
             {/* Left: Text & Actions */}

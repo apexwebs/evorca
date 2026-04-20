@@ -4,6 +4,7 @@ import { Mail, Lock, User, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
@@ -43,10 +44,36 @@ export default function RegisterPage() {
         return
       }
 
-      setSuccess('Registration successful! Redirecting to login...')
-      setTimeout(() => {
-        router.push('/auth/login')
-      }, 2000)
+      const supabase = createClient()
+      if (!supabase) {
+        setError('Registration completed, but login service is unavailable.')
+        return
+      }
+
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        console.warn('Auto-login failed after registration:', signInError)
+        setSuccess('Registration successful. Please log in to continue.')
+        return
+      }
+
+      if (signInData.session?.user) {
+        setSuccess('Registration successful! Redirecting to dashboard...')
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 1000)
+        return
+      }
+
+      setSuccess(data.message || 'Registration successful. Please log in to continue.')
+      setFullName('')
+      setEmail('')
+      setPassword('')
+      setPasswordConfirm('')
     } catch (error) {
       console.error('Registration request error:', error)
       setError('Network error. Please try again.')

@@ -8,6 +8,7 @@
 ## Critical Fixes (Must Complete First)
 - [x] **ENV-001**: Create .env.local with Supabase credentials
 - [x] **MW-001**: Move src/proxy.ts → /proxy.ts (middleware location fix)
+- [x] **STABILIZE-001**: Downgrade from experimental Next 16/Tailwind 4 to stable Next 15/Tailwind 3 to prevent system overheating and crashes.
 - [x] **AUTH-001**: Implement login API endpoint (/api/auth/login)
 - [x] **AUTH-003**: Implement registration API & page (/api/auth/register)
 - [x] **FORM-001**: Add login form submission handler
@@ -48,6 +49,13 @@
 ## Completed Fixes
 - [x] **ANALYSIS-001**: Comprehensive codebase analysis completed (37 issues identified)
 - [x] **BUILD-001**: App now builds successfully with TypeScript validation
+- [x] **API-001**: Fixed Next.js 16 API parameter syntax (params now Promise-based)
+- [x] **UX-001**: Event cards now fully clickable, removed clunky View/Edit buttons
+- [x] **DETAIL-001**: Event detail pages show full poster images and complete event data
+- [x] **NAV-001**: Improved navigation with edit/delete/copy link buttons on detail pages
+- [x] **SCHEMA-001**: Made schema idempotent with DROP IF EXISTS policies
+- [x] **UPLOAD-001**: Fixed image upload to use multipart/form-data and Supabase Storage
+- [x] **FIELDS-001**: Added all missing event fields to API (city, event_type, dress_code, etc.)
 - [x] **DB-CONNECT**: Supabase credentials configured and connected
 - [x] **SERVER-001**: Development server running successfully on localhost:3000
 - [x] **API-001**: Events API endpoint created with CRUD operations

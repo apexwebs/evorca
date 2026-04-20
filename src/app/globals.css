@@ -1,25 +1,25 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-sans: var(--font-sans);
-  --font-headline: var(--font-saira-stencil);
-
-  --color-primary: #00535b;
-  --color-primary-container: #006d77;
-  --color-on-primary: #ffffff;
+:root {
+  --primary: #00535b;
+  --primary-container: #006d77;
+  --on-primary: #ffffff;
   
-  --color-secondary: #8b6508;
-  --color-secondary-fixed: #ffd700; /* POP Gold */
-  --color-on-secondary-fixed: #1a1300;
+  --secondary: #8b6508;
+  --secondary-fixed: #ffd700; /* POP Gold */
+  --on-secondary-fixed: #1a1300;
   
-  --color-surface: #ebf0f2; /* slightly greyish blue for depth */
-  --color-surface-container-low: #e1e7e9;
-  --color-surface-container-lowest: #f5f8f9;
-  --color-surface-container-high: #d5dbde;
-  --color-on-surface: #10181A;
-  --color-on-surface-variant: #3e494a;
+  --surface: #ebf0f2; /* slightly greyish blue for depth */
+  --surface-container-low: #e1e7e9;
+  --surface-container-lowest: #f5f8f9;
+  --surface-container-high: #d5dbde;
+  --on-surface: #10181A;
+  --on-surface-variant: #3e494a;
   
-  --color-outline-variant: #bec8ca;
+  --outline-variant: #bec8ca;
+  --error: #e63946;
 }
 
 @layer base {
@@ -63,7 +63,7 @@
 
   /* SIGNATURE POLISH BUTTON (CLAY) */
   .btn-prestige-primary, .clay-btn-primary {
-    @apply bg-primary-container text-white px-8 py-4 rounded-3xl font-headline font-bold uppercase tracking-[0.2em] transition-all;
+    @apply bg-[var(--primary-container)] text-white px-8 py-4 rounded-3xl font-headline font-bold uppercase tracking-[0.2em] transition-all;
     box-shadow: 
       5px 5px 12px rgba(0,0,0,0.15), 
       -5px -5px 12px rgba(255,255,255,0.1),
@@ -78,7 +78,7 @@
   }
 
   .btn-prestige-secondary, .clay-btn-secondary {
-    @apply bg-secondary-fixed text-on-secondary-fixed px-8 py-4 rounded-3xl font-headline font-bold uppercase tracking-[0.2em] transition-all;
+    @apply bg-[var(--secondary-fixed)] text-[var(--on-secondary-fixed)] px-8 py-4 rounded-3xl font-headline font-bold uppercase tracking-[0.2em] transition-all;
     box-shadow: 
       5px 5px 12px rgba(0,0,0,0.1), 
       -5px -5px 12px rgba(255,255,255,0.4),
