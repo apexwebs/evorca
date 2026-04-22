@@ -4,22 +4,38 @@
 
 :root {
   --primary: #00535b;
+  --primary-rgb: 0 83 91;
   --primary-container: #006d77;
+  --primary-container-rgb: 0 109 119;
   --on-primary: #ffffff;
+  --on-primary-rgb: 255 255 255;
   
   --secondary: #8b6508;
+  --secondary-rgb: 139 101 8;
   --secondary-fixed: #ffd700; /* POP Gold */
+  --secondary-fixed-rgb: 255 215 0;
   --on-secondary-fixed: #1a1300;
+  --on-secondary-fixed-rgb: 26 19 0;
   
   --surface: #ebf0f2; /* slightly greyish blue for depth */
+  --surface-rgb: 235 240 242;
   --surface-container-low: #e1e7e9;
+  --surface-container-low-rgb: 225 231 233;
   --surface-container-lowest: #f5f8f9;
+  --surface-container-lowest-rgb: 245 248 249;
   --surface-container-high: #d5dbde;
+  --surface-container-high-rgb: 213 219 222;
   --on-surface: #10181A;
+  --on-surface-rgb: 16 24 26;
   --on-surface-variant: #3e494a;
+  --on-surface-variant-rgb: 62 73 74;
   
+  --outline: #bec8ca;
+  --outline-rgb: 190 200 202;
   --outline-variant: #bec8ca;
+  --outline-variant-rgb: 190 200 202;
   --error: #e63946;
+  --error-rgb: 230 57 70;
 }
 
 @layer base {

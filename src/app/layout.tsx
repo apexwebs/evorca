@@ -3,7 +3,7 @@ import { Saira_Stencil_One, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/contexts/AuthContext";
-import BottomNav from "@/components/BottomNav";
+
 import { ReactNode } from "react";
 
 const sans = Plus_Jakarta_Sans({

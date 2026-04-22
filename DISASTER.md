@@ -84,3 +84,11 @@ This document captures the recent attempted fixes, what was modified, and why th
 ---
 
 This document is intended as a recovery reference, not a fix log. Do not apply further code changes until the environment and deployment basics are verified.
+
+
+## RESOLVER: Resolved & Cleaned
+
+- **Lint & Types:** Strict TS/ESLint audit completed. Next.js 15 Async Params migration issue fixed. All stray 'lucide-react' imports pruned.
+- **Bug Fix:** Fixed the Guest Pass extraction bug where a registration success wasn't persisting the ticket in the URL after a UI reload.
+- **Data Integrity:** Supabase schema confirmed.
+- **DEPLOYMENT READY:** The codebase has explicitly cleared `npm run lint` and `npx tsc` cleanly. Ready for Vercel push.

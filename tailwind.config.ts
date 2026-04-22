@@ -9,17 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "var(--primary)",
-        secondary: "var(--secondary)",
-        surface: "var(--surface)",
-        "on-surface": "var(--on-surface)",
-        "on-surface-variant": "var(--on-surface-variant)",
-        outline: "var(--outline)",
-        "outline-variant": "var(--outline-variant)",
-        "surface-container": "var(--surface-container)",
-        "surface-container-low": "var(--surface-container-low)",
-        "surface-container-lowest": "var(--surface-container-lowest)",
-        error: "var(--error)",
+        primary: "rgb(var(--primary-rgb) / <alpha-value>)",
+        secondary: "rgb(var(--secondary-rgb) / <alpha-value>)",
+        surface: "rgb(var(--surface-rgb) / <alpha-value>)",
+        "on-surface": "rgb(var(--on-surface-rgb) / <alpha-value>)",
+        "on-surface-variant": "rgb(var(--on-surface-variant-rgb) / <alpha-value>)",
+        outline: "rgb(var(--outline-rgb) / <alpha-value>)",
+        "outline-variant": "rgb(var(--outline-variant-rgb) / <alpha-value>)",
+        "surface-container": "rgb(var(--surface-rgb) / <alpha-value>)",
+        "surface-container-low": "rgb(var(--surface-container-low-rgb) / <alpha-value>)",
+        "surface-container-lowest": "rgb(var(--surface-container-lowest-rgb) / <alpha-value>)",
+        error: "rgb(var(--error-rgb) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

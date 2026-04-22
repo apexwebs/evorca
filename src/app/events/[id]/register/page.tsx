@@ -1,14 +1,16 @@
 import { redirect } from 'next/navigation'
 
-export default function RegisterRedirectPage({
+export default async function RegisterRedirectPage({
   params,
   searchParams,
 }: {
-  params: { id: string }
-  searchParams?: { ticket?: string }
+  params: Promise<{ id: string }>
+  searchParams?: Promise<{ ticket?: string }>
 }) {
-  const ticket = searchParams?.ticket?.trim()
+  const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const ticket = resolvedSearchParams?.ticket?.trim()
   const query = ticket ? `?ticket=${encodeURIComponent(ticket)}` : ''
-  redirect(`/events/${params.id}${query}`)
+  redirect(`/events/${resolvedParams.id}${query}`)
 }
 

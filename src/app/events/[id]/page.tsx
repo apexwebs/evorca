@@ -8,14 +8,10 @@ import {
   Calendar, 
   MapPin, 
   User, 
-  Phone, 
   Ticket, 
-  ChevronRight, 
   CheckCircle2, 
   ExternalLink,
   Shirt,
-  Info,
-  Clock,
   ArrowRight,
   Copy
 } from 'lucide-react'
@@ -48,6 +44,7 @@ export default function PublicEventPage() {
   const [registrationSuccess, setRegistrationSuccess] = useState('')
   const [ticketCode, setTicketCode] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [guest, setGuest] = useState<any>(null)
   const [formData, setFormData] = useState({
     full_name: '',
@@ -526,7 +523,13 @@ export default function PublicEventPage() {
                     </p>
                   </div>
                   <button 
-                    onClick={() => window.location.reload()}
+                    onClick={() => {
+                      if (ticketCode) {
+                        window.location.href = `${window.location.pathname}?ticket=${ticketCode}`
+                      } else {
+                        window.location.reload()
+                      }
+                    }}
                     className="clay-btn-secondary w-full h-14 text-xs font-headline flex items-center justify-center gap-3 tracking-[0.2em]"
                   >
                     Retrieve Guest Pass

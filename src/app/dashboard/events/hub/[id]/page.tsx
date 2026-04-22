@@ -4,13 +4,13 @@ import AdaptiveImage from '@/components/AdaptiveImage'
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { QRCodeSVG } from 'qrcode.react'
+
 import { toast } from 'react-hot-toast'
 import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
 import EventEditForm from '@/components/EventEditForm'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { Drawer } from '@/components/ui/Drawer'
+
 import { CardSkeleton } from '@/components/ui/Skeleton'
 
 interface EventDetails {
@@ -749,7 +749,7 @@ function ScanTab({ eventId }: { eventId: string }) {
         const param = url.searchParams.get('ticket')
         if (param) codeToSubmit = param
       }
-    } catch (err) {}
+    } catch {}
 
     setIsSubmitting(true)
     setResultMessage('')
@@ -771,7 +771,7 @@ function ScanTab({ eventId }: { eventId: string }) {
       const guestName = data?.guest?.full_name || 'Guest'
       setResultMessage(`Welcome, ${guestName}!`)
       setTicketCode('')
-    } catch (err) {
+    } catch {
       setResultError('Network error while checking in')
     } finally {
       setIsSubmitting(false)
@@ -793,7 +793,7 @@ function ScanTab({ eventId }: { eventId: string }) {
             handleCheckin(null, decodedText);
           }
         },
-        (error) => {}
+        () => {}
       ).catch((err) => {
         console.warn("Scanner error:", err);
       });
