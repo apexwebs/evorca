@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { CardSkeleton } from '@/components/ui/Skeleton'
+import { useAuth } from '@/contexts/AuthContext'
 
 type GuestItem = {
   id: string
@@ -19,20 +21,38 @@ type GuestItem = {
 const allowedStatuses: GuestItem['status'][] = ['invited', 'confirmed', 'declined', 'checked_in']
 
 export default function GuestsPage() {
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [guests, setGuests] = useState<GuestItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [savingGuestId, setSavingGuestId] = useState('')
   const [actionMessage, setActionMessage] = useState('')
 
+  // Client-side auth guard (defense-in-depth)
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/login')
+    }
+  }, [authLoading, user, router])
+
+  useEffect(() => {
+    // Don't fetch data until auth is confirmed
+    if (authLoading || !user) return
+
     const loadGuests = async () => {
       setLoading(true)
       setError('')
       try {
         const res = await fetch('/api/guests')
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || 'Failed to load guests')
+        if (!res.ok) {
+          if (res.status === 401) {
+            router.replace('/auth/login')
+            return
+          }
+          throw new Error(data.error || 'Failed to load guests')
+        }
         setGuests(data.guests || [])
       } catch (err) {
         setError((err as Error).message || 'Failed to load guests')
@@ -41,7 +61,26 @@ export default function GuestsPage() {
       }
     }
     loadGuests()
-  }, [])
+  }, [authLoading, user, router])
+
+  // Must be called before any early returns (React rules of hooks)
+  const stats = useMemo(() => {
+    const total = guests.length
+    const confirmed = guests.filter((g) => g.status === 'confirmed').length
+    const checkedIn = guests.filter((g) => g.status === 'checked_in').length
+    return { total, confirmed, checkedIn }
+  }, [guests])
+
+  // Show loading while auth is being checked
+  if (authLoading || !user) {
+    return (
+      <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    )
+  }
 
   const refreshGuests = async () => {
     try {
@@ -83,12 +122,7 @@ export default function GuestsPage() {
     }
   }
 
-  const stats = useMemo(() => {
-    const total = guests.length
-    const confirmed = guests.filter((g) => g.status === 'confirmed').length
-    const checkedIn = guests.filter((g) => g.status === 'checked_in').length
-    return { total, confirmed, checkedIn }
-  }, [guests])
+
 
   return (
     <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6 sm:space-y-8">

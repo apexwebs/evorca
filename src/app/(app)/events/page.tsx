@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, Calendar, Users, Ticket } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/Skeleton'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Event {
   id: string
@@ -14,17 +16,33 @@ interface Event {
 }
 
 export default function EventsPage() {
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // Client-side auth guard (defense-in-depth)
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/login')
+    }
+  }, [authLoading, user, router])
+
+  useEffect(() => {
+    // Don't fetch data until auth is confirmed
+    if (authLoading || !user) return
+
     const fetchEvents = async () => {
       try {
         const response = await fetch('/api/events')
         const data = await response.json()
 
         if (!response.ok) {
+          if (response.status === 401) {
+            router.replace('/auth/login')
+            return
+          }
           setError(data.error || 'Failed to fetch events')
           return
         }
@@ -39,7 +57,18 @@ export default function EventsPage() {
     }
 
     fetchEvents()
-  }, [])
+  }, [authLoading, user, router])
+
+  // Show loading while auth is being checked
+  if (authLoading || !user) {
+    return (
+      <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8 sm:py-12 px-3 sm:px-4 space-y-6 sm:space-y-8">

@@ -42,14 +42,34 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // SPRINT 1 Logic: Simple Auth Guard for /dashboard
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    request.nextUrl.pathname.startsWith('/dashboard')
-  ) {
+  // Auth Guard: Protect all app routes that require authentication
+  const isProtectedRoute =
+    request.nextUrl.pathname.startsWith('/dashboard') ||
+    request.nextUrl.pathname.startsWith('/events') ||
+    request.nextUrl.pathname.startsWith('/guests') ||
+    request.nextUrl.pathname.startsWith('/tools')
+
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/auth')
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api')
+  const isRootRoute = request.nextUrl.pathname === '/'
+
+  if (!user && isProtectedRoute && !isAuthRoute && !isApiRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  // If user is logged in and visits root, send them to dashboard
+  if (user && isRootRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
+  // If user is logged in and visits auth pages, redirect to dashboard
+  if (user && isAuthRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 

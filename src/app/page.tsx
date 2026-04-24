@@ -8,7 +8,9 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    router.push('/dashboard')
+    // Safe default: send to login. Middleware handles redirect to
+    // /dashboard for already-authenticated users.
+    router.push('/auth/login')
   }, [router])
 
   return (
@@ -35,11 +37,11 @@ export default function Home() {
         
         {/* Fallback buttons in case JS is disabled or router gets stuck */}
         <div className="flex items-center gap-4 animate-in slide-in-from-bottom-6 fade-in duration-1000 delay-500 fill-mode-both">
-          <Link href="/dashboard" className="clay-btn-primary h-12 px-8 text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all">
-            Enter Dashboard
-          </Link>
-          <Link href="/auth/login" className="clay-btn-secondary h-12 px-8 text-xs font-bold">
+          <Link href="/auth/login" className="clay-btn-primary h-12 px-8 text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all">
             Sign In
+          </Link>
+          <Link href="/auth/register" className="clay-btn-secondary h-12 px-8 text-xs font-bold">
+            Create Account
           </Link>
         </div>
       </div>

@@ -195,30 +195,20 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const authClient = await createClient()
-    const serviceClient = createServiceRoleClient()
 
-    let supabase = authClient
-    let filterUserId: string | null = null
-
-    if (authClient) {
-      const { data: { user }, error: userError } = await authClient.auth.getUser()
-      if (!userError && user) {
-        filterUserId = user.id
-      }
-    }
-
-    if (!authClient && serviceClient) {
-      supabase = serviceClient
-    }
-
-    if (!supabase) {
+    if (!authClient) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
     }
 
-    let query = supabase.from('events').select('*').order('created_at', { ascending: false })
-    if (filterUserId) {
-      query = query.eq('created_by', filterUserId)
+    const { data: { user }, error: userError } = await authClient.auth.getUser()
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
+
+    const filterUserId = user.id
+
+    const query = authClient.from('events').select('*').order('created_at', { ascending: false }).eq('created_by', filterUserId)
 
     const { data: events, error: eventsError } = await query
 

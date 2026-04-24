@@ -3,7 +3,9 @@
 import { Calendar, Users, QrCode, TrendingUp, Sparkles, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { CardSkeleton } from '@/components/ui/Skeleton'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Event {
   id: string
@@ -14,12 +16,24 @@ interface Event {
 }
 
 export default function Dashboard() {
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [events, setEvents] = useState<Event[]>([])
   const [checkIns, setCheckIns] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // Client-side auth guard (defense-in-depth)
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/login')
+    }
+  }, [authLoading, user, router])
+
+  useEffect(() => {
+    // Don't fetch data until auth is confirmed
+    if (authLoading || !user) return
+
     const fetchDashboardData = async () => {
       try {
         const [eventsResponse, guestsResponse] = await Promise.all([
@@ -30,6 +44,10 @@ export default function Dashboard() {
         const guestsData = await guestsResponse.json()
 
         if (!eventsResponse.ok) {
+          if (eventsResponse.status === 401) {
+            router.replace('/auth/login')
+            return
+          }
           setError(eventsData.error || 'Failed to fetch events')
           return
         }
@@ -51,7 +69,20 @@ export default function Dashboard() {
     }
 
     fetchDashboardData()
-  }, [])
+  }, [authLoading, user, router])
+
+  // Show loading while auth is being checked
+  if (authLoading || !user) {
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
 
   // Calculate stats from real data
   const activeEvents = events.filter(event => event.status === 'published').length
