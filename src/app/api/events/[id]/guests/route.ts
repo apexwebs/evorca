@@ -240,7 +240,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return insertResult.data
     }
 
-    const processedGuests: any[] = []
+    const processedGuests: unknown[] = []
     for (const entry of guestEntries) {
       const fullName = `${entry?.full_name || ''}`
       const phone = `${entry?.phone || ''}`

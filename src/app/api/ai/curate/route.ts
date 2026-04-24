@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    const { prompt, type } = await request.json()
+    const { prompt } = await request.json()
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     let aiResponse;
     
     if (GEMINI_API_KEY) {
-      aiResponse = await callGemini(prompt, type)
+      aiResponse = await callGemini(prompt)
     } else if (OPENROUTER_API_KEY) {
-      aiResponse = await callOpenRouter(prompt, type)
+      aiResponse = await callOpenRouter(prompt)
     } else {
       return NextResponse.json({ 
         error: 'AI keys missing', 
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function callGemini(prompt: string, type: string) {
+async function callGemini(prompt: string) {
   const model = "gemini-1.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
   
@@ -79,7 +79,7 @@ async function callGemini(prompt: string, type: string) {
   return jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: text };
 }
 
-async function callOpenRouter(prompt: string, type: string) {
+async function callOpenRouter(prompt: string) {
   const url = 'https://openrouter.ai/api/v1/chat/completions';
   
   const response = await fetch(url, {

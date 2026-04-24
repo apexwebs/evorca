@@ -43,11 +43,11 @@ export async function POST(
     if (authHeader?.startsWith('Bearer ')) {
       try {
         const token = authHeader.substring(7)
-        const decoded = jwt.verify(token, JWT_SECRET) as any
+        const decoded = jwt.verify(token, JWT_SECRET) as { role: string; eventId: string }
         if (decoded.role === 'staff' && decoded.eventId === eventId) {
           isAuthorized = true
         }
-      } catch (err) {
+      } catch {
         console.warn('Invalid staff token attempt')
       }
     }

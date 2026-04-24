@@ -24,6 +24,15 @@ import {
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 
+interface CurationResult {
+  title: string
+  description: string
+  dress_code: string
+  suggested_price: number
+  currency: string
+  tiers: { name: string; price: number; description: string }[]
+}
+
 export default function ToolsPage() {
   const searchParams = useSearchParams()
   const queryTab = (searchParams.get('tab') || '').toLowerCase()
@@ -31,7 +40,7 @@ export default function ToolsPage() {
     queryTab === 'insights' || queryTab === 'account' || queryTab === 'support' ? queryTab : 'ai'
   const [activeTab, setActiveTab] = useState<'ai' | 'insights' | 'account' | 'support'>(initialTab)
   const [aiPrompt, setAiPrompt] = useState('')
-  const [curationResult, setCurationResult] = useState<any>(null)
+  const [curationResult, setCurationResult] = useState<CurationResult | null>(null)
   const [isCurating, setIsCurating] = useState(false)
 
   const handleCurate = async () => {
@@ -214,7 +223,7 @@ export default function ToolsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                           <p className="text-sm text-on-surface-variant leading-relaxed italic">
-                            "{curationResult.description}"
+                            &quot;{curationResult.description}&quot;
                           </p>
                           <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-primary">
                             <span className="bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
@@ -229,9 +238,9 @@ export default function ToolsPage() {
                         <div className="space-y-3 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-inner">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2">Suggested Tiers</p>
                           <div className="flex flex-wrap gap-2">
-                            {curationResult.tiers?.map((tier: string) => (
-                              <span key={tier} className="px-3 py-1.5 bg-white rounded-lg text-[10px] font-bold border border-outline-variant/10 shadow-sm">
-                                {tier}
+                            {curationResult.tiers?.map((tier) => (
+                              <span key={tier.name} className="px-3 py-1.5 bg-white rounded-lg text-[10px] font-bold border border-outline-variant/10 shadow-sm">
+                                {tier.name}: {curationResult.currency} {tier.price}
                               </span>
                             ))}
                           </div>

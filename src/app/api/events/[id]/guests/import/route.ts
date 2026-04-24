@@ -44,7 +44,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Invalid guest list format' }, { status: 400 })
     }
 
-    const guestsToInsert = guests.map((guest: any) => {
+    const guestsToInsert = guests.map((guest: { full_name: string; phone: string; email?: string }) => {
       const ticketCode = generatePrestigeCode()
       
       return {
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         phone: guest.phone,
         email: guest.email || null,
         ticket_code: ticketCode,
-        status: 'invited'
+        status: 'invited' as const
       }
     })
 

@@ -1,7 +1,7 @@
 'use client'
 
 import AdaptiveImage from '@/components/AdaptiveImage'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, Trash2, Edit, Share2, Users, Mail, Plus } from 'lucide-react'
@@ -84,7 +84,7 @@ export default function EventDetailPage() {
     fetchEvent()
   }, [eventId])
 
-  const fetchGuests = async () => {
+  const fetchGuests = useCallback(async () => {
     if (!eventId) return
 
     setGuestsLoading(true)
@@ -103,7 +103,7 @@ export default function EventDetailPage() {
     } finally {
       setGuestsLoading(false)
     }
-  }
+  }, [eventId])
 
   useEffect(() => {
     if (activeTab === 'guests' && eventId) {

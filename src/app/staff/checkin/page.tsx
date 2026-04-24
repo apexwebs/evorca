@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
-import { ScanLine, ShieldCheck, XCircle, ChevronLeft, AlertCircle } from 'lucide-react'
+import { ShieldCheck, XCircle, ChevronLeft, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function StaffScannerPage() {
@@ -10,8 +10,7 @@ export default function StaffScannerPage() {
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [ticketCode, setTicketCode] = useState('')
-  const [scanResult, setScanResult] = useState<{ success: boolean; message: string; guest?: any } | null>(null)
+  const [scanResult, setScanResult] = useState<{ success: boolean; message: string; guest?: { full_name: string } } | null>(null)
 
   const handleAuthorize = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,7 +67,7 @@ export default function StaffScannerPage() {
       
       // Clear result after 3 seconds for next scan
       setTimeout(() => setScanResult(null), 3000)
-    } catch (err) {
+    } catch {
       setScanResult({ success: false, message: 'Network error' })
     }
   }
@@ -81,7 +80,6 @@ export default function StaffScannerPage() {
       { facingMode: "environment" },
       { fps: 10, qrbox: { width: 280, height: 280 } },
       (decodedText) => {
-        setTicketCode(decodedText)
         handleCheckin(decodedText)
       },
       () => {}

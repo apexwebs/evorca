@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
 import { toast } from 'react-hot-toast'
-import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus, FileUp, Sparkles, ShieldCheck, Check, Copy, Download, Ticket } from 'lucide-react'
+import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus, FileUp, ShieldCheck, Check, Copy, Download, Ticket } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
 import EventEditForm from '@/components/EventEditForm'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -836,7 +836,7 @@ function ScanTab({ eventId }: { eventId: string }) {
   const [resultError, setResultError] = useState('')
   const [isScannerActive, setIsScannerActive] = useState(true)
 
-  const handleCheckin = async (e: React.FormEvent | null, manualCode?: string) => {
+  const handleCheckin = useCallback(async (e: React.FormEvent | null, manualCode?: string) => {
     if (e) e.preventDefault()
     let codeToSubmit = (manualCode || ticketCode).trim()
     if (!codeToSubmit) return
@@ -848,7 +848,9 @@ function ScanTab({ eventId }: { eventId: string }) {
         const param = url.searchParams.get('ticket')
         if (param) codeToSubmit = param
       }
-    } catch {}
+    } catch {
+      // Not a URL, continue with code as is
+    }
 
     setIsSubmitting(true)
     setResultMessage('')
@@ -875,7 +877,7 @@ function ScanTab({ eventId }: { eventId: string }) {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [eventId, ticketCode])
 
   useEffect(() => {
     let html5QrCode: Html5Qrcode | null = null;
@@ -888,7 +890,6 @@ function ScanTab({ eventId }: { eventId: string }) {
         { fps: 15, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
           if (isMounted) {
-            setTicketCode(decodedText);
             handleCheckin(null, decodedText);
           }
         },
@@ -901,10 +902,12 @@ function ScanTab({ eventId }: { eventId: string }) {
     return () => {
       isMounted = false;
       if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => html5QrCode!.clear()).catch(console.error);
+        html5QrCode.stop().then(() => {
+          if (html5QrCode) html5QrCode.clear();
+        }).catch(console.error);
       }
     };
-  }, [isScannerActive, resultMessage, resultError, isSubmitting])
+  }, [isScannerActive, resultMessage, resultError, isSubmitting, handleCheckin])
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -985,6 +988,7 @@ function ScanTab({ eventId }: { eventId: string }) {
   )
 }
 
+
 function SettingsTab({ event }: { event: EventDetails }) {
   const [copyFeedback, setCopyFeedback] = useState('')
 
@@ -1037,7 +1041,7 @@ function SettingsTab({ event }: { event: EventDetails }) {
               </button>
             </div>
             <p className="text-[9px] text-on-surface-variant/50 italic px-2">
-              Give this link and the code above to your gate staff. They won't need to login with your account.
+              Give this link and the code above to your gate staff. They won&apos;t need to login with your account.
             </p>
           </div>
         </div>
