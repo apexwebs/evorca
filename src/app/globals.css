@@ -119,18 +119,22 @@
   }
 
   /* EDITORIAL INPUTS (Clay) */
-  .input-prestige, .form-input {
+  .input-prestige, .form-input, .clay-input {
     @apply bg-surface-container-lowest text-on-surface rounded-2xl border-2 border-white/60 focus:outline-none focus:ring-0 transition-all px-4 py-3 text-base font-sans;
     box-shadow: 
       inset 3px 3px 6px rgba(0,0,0,0.03), 
       inset -3px -3px 6px rgba(255,255,255,0.8),
       3px 3px 10px rgba(0,0,0,0.02);
   }
-  .input-prestige:focus, .form-input:focus {
+  .input-prestige:focus, .form-input:focus, .clay-input:focus {
     @apply border-primary/30;
     box-shadow: 
       inset 4px 4px 8px rgba(0,0,0,0.05), 
       inset -4px -4px 8px rgba(255,255,255,0.9),
       0 0 0 3px rgba(0,109,119,0.1);
+  }
+
+  .font-headline {
+    font-family: var(--font-saira-stencil), system-ui, sans-serif;
   }
 }

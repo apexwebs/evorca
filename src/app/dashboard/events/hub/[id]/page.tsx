@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
 import { toast } from 'react-hot-toast'
-import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus } from 'lucide-react'
+import { Calendar, Users, TrendingUp, Settings, Edit, Share2, Trash2, ScanLine, UserPlus, FileUp, Sparkles, ShieldCheck, Check, Copy, Download, Ticket } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
 import EventEditForm from '@/components/EventEditForm'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -28,6 +28,7 @@ interface EventDetails {
   dress_code?: string
   ticket_price?: number
   currency?: string
+  staff_access_code?: string
   ticket_type?: string
   is_public?: boolean
 }
@@ -329,7 +330,8 @@ function GuestsTab({ event }: { event: EventDetails }) {
   const [inviteLoading, setInviteLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [showBulk, setShowBulk] = useState(false)
+  const [importMode, setImportMode] = useState<'single' | 'paste' | 'csv'>('single')
+  const [isImporting, setIsImporting] = useState(false)
 
   const eventId = event.id
 
@@ -370,6 +372,44 @@ function GuestsTab({ event }: { event: EventDetails }) {
     return () => window.clearInterval(interval)
   }, [fetchGuests])
 
+  const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsImporting(true)
+    try {
+      const text = await file.text()
+      const lines = text.split('\n').map(line => line.trim()).filter(Boolean)
+      
+      // Skip header if it contains "name" or "full_name"
+      const startIdx = lines[0].toLowerCase().includes('name') ? 1 : 0
+      
+      const parsedGuests = lines.slice(startIdx).map(line => {
+        const [full_name, phone, email] = line.split(/[;,]/).map(v => (v || '').trim())
+        return { full_name, phone, email }
+      }).filter(g => g.full_name)
+
+      if (parsedGuests.length === 0) throw new Error('No valid guest data found in CSV.')
+
+      const res = await fetch(`/api/events/${eventId}/guests/import`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guests: parsedGuests })
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Bulk import failed')
+
+      toast.success(data.message)
+      setIsModalOpen(false)
+      fetchGuests()
+    } catch (err) {
+      toast.error((err as Error).message)
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
     setInviteLoading(true)
@@ -377,58 +417,56 @@ function GuestsTab({ event }: { event: EventDetails }) {
 
     try {
       const nameRegex = /^[A-Za-z][A-Za-z\s'.-]{1,79}$/
-      const phoneRegex = /^\+254[17]\d{8}$/
+      
+      if (importMode === 'paste') {
+        const parsedBulkGuests = bulkInput
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => {
+            const [full_name, phone] = line.split(/[;,]/).map((v) => (v || '').trim())
+            return { full_name, phone }
+          })
+          .filter(g => g.full_name)
 
-      const parsedBulkGuests = bulkInput
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => {
-          const [full_name, phone] = line.split(/[;,]/).map((v) => (v || '').trim())
-          return { full_name, phone }
+        if (parsedBulkGuests.length === 0) throw new Error('No guests detected in paste area.')
+
+        const res = await fetch(`/api/events/${eventId}/guests/import`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guests: parsedBulkGuests })
         })
 
-      const payload = showBulk && parsedBulkGuests.length > 0
-        ? { guests: parsedBulkGuests }
-        : { full_name: inviteForm.full_name.trim(), phone: inviteForm.phone.trim() }
-
-      const guestsToValidate = showBulk && parsedBulkGuests.length > 0
-        ? parsedBulkGuests
-        : [{ full_name: inviteForm.full_name.trim(), phone: inviteForm.phone.trim() }]
-
-      for (const guest of guestsToValidate) {
-        if (!nameRegex.test(guest.full_name)) {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Bulk import failed')
+        
+        toast.success(data.message)
+      } else {
+        // Single invite
+        if (!nameRegex.test(inviteForm.full_name.trim())) {
           throw new Error('Name must contain letters only (2-80 chars).')
         }
-        if (!phoneRegex.test(guest.phone)) {
-          throw new Error('Phone must be in +254XXXXXXXXX format.')
-        }
+
+        const res = await fetch(`/api/events/${eventId}/guests`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: inviteForm.full_name.trim(),
+            phone: inviteForm.phone.trim()
+          })
+        })
+
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Could not add guest')
+        toast.success('Guest added successfully.')
       }
 
-      const res = await fetch(`/api/events/${eventId}/guests`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Could not add guest')
-      }
-
-      setActionMessage(data.message || 'Guest added successfully.')
-      toast.success(data.message || 'Guest added successfully.')
       setInviteForm({ full_name: '', phone: '' })
       setBulkInput('')
-      setShowBulk(false)
       setIsModalOpen(false)
       fetchGuests()
     } catch (err) {
-      console.error('Invite failed:', err)
-      const message = (err as Error).message || 'Failed to add guest'
-      setActionMessage(message)
-      toast.error(message)
+      toast.error((err as Error).message)
     } finally {
       setInviteLoading(false)
     }
@@ -519,6 +557,36 @@ function GuestsTab({ event }: { event: EventDetails }) {
     }
   }
 
+  const downloadGuests = () => {
+    if (!guests || guests.length === 0) {
+      toast.error('No guests to export')
+      return
+    }
+
+    const headers = ['Full Name', 'Phone', 'Status', 'Ticket Code', 'Invited At']
+    const csvContent = [
+      headers.join(','),
+      ...guests.map(g => [
+        `"${g.full_name}"`,
+        `"${g.phone || ''}"`,
+        `"${g.status}"`,
+        `"${g.ticket_code}"`,
+        `"${new Date(g.invited_at || '').toLocaleString()}"`
+      ].join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `guests_${event.title.replace(/\s+/g, '_').toLowerCase()}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast.success('Guest list exported!')
+  }
+
   return (
     <div className="grid grid-cols-1 gap-6">
       <div className="clay-card p-6 space-y-5">
@@ -534,6 +602,13 @@ function GuestsTab({ event }: { event: EventDetails }) {
               onClick={() => setIsModalOpen(true)}
             >
               <UserPlus className="w-4 h-4 mr-2" /> Add Guests
+            </button>
+            <button
+              type="button"
+              className="clay-btn-secondary px-6 h-10 py-0 text-xs shadow-none flex items-center justify-center"
+              onClick={downloadGuests}
+            >
+              <Download className="w-4 h-4 mr-2" /> Export CSV
             </button>
             <button
               type="button"
@@ -580,39 +655,41 @@ function GuestsTab({ event }: { event: EventDetails }) {
             </div>
             
             <div className="p-8">
-              <form onSubmit={handleInvite} className="space-y-6">
-                <div className="flex justify-end items-center gap-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Bulk Registration Mode</span>
-                  <button 
-                    type="button"
-                    onClick={() => setShowBulk(!showBulk)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${showBulk ? 'bg-primary' : 'bg-outline-variant/30'}`}
+              <div className="flex gap-2 mb-8 p-1 bg-surface-container-low rounded-2xl">
+                {(['single', 'paste', 'csv'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setImportMode(mode)}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${
+                      importMode === mode ? 'bg-primary text-white shadow-md' : 'text-on-surface-variant hover:bg-white/40'
+                    }`}
                   >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showBulk ? 'translate-x-6' : 'translate-x-1'}`} />
+                    {mode}
                   </button>
-                </div>
+                ))}
+              </div>
 
-                {!showBulk ? (
+              <form onSubmit={handleInvite} className="space-y-6">
+                {importMode === 'single' ? (
                   <>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Guest Name</label>
+                      <label className="text-[10px] font-headline font-bold uppercase tracking-widest text-primary ml-1">Guest Name</label>
                       <input
                         type="text"
                         className="form-input w-full h-12"
                         placeholder="e.g. John Doe"
                         value={inviteForm.full_name}
                         onChange={(e) => setInviteForm(prev => ({ ...prev, full_name: e.target.value }))}
-                        required={!showBulk}
+                        required={importMode === 'single'}
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Phone Number</label>
+                      <label className="text-[10px] font-headline font-bold uppercase tracking-widest text-primary ml-1">Phone Number</label>
                       <input
                         type="tel"
                         className="form-input w-full h-12 font-mono tracking-wider"
                         placeholder="+254 7XX XXX XXX"
                         value={inviteForm.phone}
-                        required={!showBulk}
                         onChange={(e) => {
                           let val = e.target.value.replace(/[^\d+]/g, '')
                           if (val.startsWith('0')) val = '+254' + val.slice(1)
@@ -623,24 +700,46 @@ function GuestsTab({ event }: { event: EventDetails }) {
                       />
                     </div>
                   </>
-                ) : (
+                ) : importMode === 'paste' ? (
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Paste Guest List</label>
+                    <label className="text-[10px] font-headline font-bold uppercase tracking-widest text-primary ml-1">Paste Guest List</label>
                     <textarea
                       className="form-input w-full min-h-[160px] text-sm"
                       placeholder={'Format: Name, Phone (one per line)\ne.g. Jane Doe, +254 712 345 678'}
                       value={bulkInput}
                       onChange={(e) => setBulkInput(e.target.value)}
-                      required={showBulk}
+                      required={importMode === 'paste'}
                     />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-headline font-bold uppercase tracking-widest text-primary ml-1 block text-center">Upload CSV/Excel</label>
+                    <div className="border-3 border-dashed border-outline-variant/30 rounded-[2rem] p-10 flex flex-col items-center gap-4 hover:border-primary/50 transition-all cursor-pointer bg-surface-container-lowest group relative">
+                      <input 
+                        type="file" 
+                        accept=".csv" 
+                        onChange={handleCSVUpload}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                        disabled={isImporting}
+                      />
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                         <FileUp className="w-8 h-8 text-primary" />
+                      </div>
+                      <p className="text-xs font-bold text-on-surface-variant text-center">
+                        {isImporting ? 'Processing Data...' : 'Drop CSV here or click to browse'}
+                      </p>
+                      <p className="text-[9px] uppercase tracking-widest text-on-surface-variant/40">Format: Name, Phone, Email</p>
+                    </div>
                   </div>
                 )}
                 
-                <div className="pt-4">
-                  <button type="submit" className="clay-btn-primary w-full h-14 text-xs font-bold" disabled={inviteLoading}>
-                    {inviteLoading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mx-auto" /> : (showBulk ? 'Add Bulk Guests' : 'Add Single Guest')}
-                  </button>
-                </div>
+                {importMode !== 'csv' && (
+                  <div className="pt-4">
+                    <button type="submit" className="clay-btn-primary w-full h-14 text-xs font-bold" disabled={inviteLoading}>
+                      {inviteLoading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mx-auto" /> : (importMode === 'paste' ? 'Commit Bulk List' : 'Establish Invitation')}
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           </div>
@@ -886,6 +985,89 @@ function ScanTab({ eventId }: { eventId: string }) {
   )
 }
 
+function SettingsTab({ event }: { event: EventDetails }) {
+  const [copyFeedback, setCopyFeedback] = useState('')
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopyFeedback('Copied!')
+    setTimeout(() => setCopyFeedback(''), 2000)
+  }
+
+  const staffLink = `${window.location.origin}/staff/checkin`
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="clay-card p-8 space-y-6">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+            <ShieldCheck className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-headline font-bold text-primary text-xl">Gate Governance</h3>
+            <p className="text-on-surface-variant text-xs font-sans">Manage scanner access for staff.</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="p-5 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-2">Staff Access Code</p>
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-2xl font-extrabold text-primary tracking-widest">
+                {event.staff_access_code || 'NOT SET'}
+              </span>
+              <button 
+                onClick={() => copyToClipboard(event.staff_access_code || '')}
+                className="p-2 hover:bg-white/50 rounded-lg transition-colors text-primary"
+              >
+                {copyFeedback === 'Copied!' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Staff Scanner Link</p>
+            <div className="p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 flex items-center justify-between gap-3 overflow-hidden">
+              <span className="text-xs text-on-surface-variant truncate font-mono">{staffLink}</span>
+              <button 
+                onClick={() => copyToClipboard(staffLink)}
+                className="shrink-0 clay-btn-secondary h-10 px-4 text-[10px]"
+              >
+                Copy Link
+              </button>
+            </div>
+            <p className="text-[9px] text-on-surface-variant/50 italic px-2">
+              Give this link and the code above to your gate staff. They won't need to login with your account.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="clay-card p-8 space-y-6">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center">
+            <Ticket className="w-6 h-6 text-secondary" />
+          </div>
+          <div>
+            <h3 className="font-headline font-bold text-primary text-xl">Payment & Ticketing</h3>
+            <p className="text-on-surface-variant text-xs font-sans">Configure M-Pesa integration.</p>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">M-Pesa Business Number</label>
+            <input type="text" className="clay-input w-full h-12" placeholder="Paybill or Till Number" />
+          </div>
+          <button className="clay-btn-primary px-8 h-12 text-xs font-bold">
+            Update Payment Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AnalyticsTab({ eventId }: { eventId: string }) {
   const [stats, setStats] = useState({ total: 0, checkedIn: 0, confirmed: 0 })
   const [loading, setLoading] = useState(true)
@@ -932,50 +1114,6 @@ function AnalyticsTab({ eventId }: { eventId: string }) {
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70 mb-2">Gate Completion</p>
         <p className="text-5xl font-headline font-extrabold text-primary mb-1">{completionRate}%</p>
         <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-2">{stats.checkedIn} Checked-in</p>
-      </div>
-    </div>
-  )
-}
-
-function SettingsTab({ event }: { event: EventDetails }) {
-  return (
-    <div className="space-y-6">
-      <div className="clay-card p-8 border border-primary/20 bg-surface-container-low">
-        <h3 className="font-headline font-bold text-primary text-xl mb-4">Payment & Ticketing Details</h3>
-        <p className="text-sm text-on-surface-variant mb-6 font-sans">Configure M-Pesa integration for ticket sales. Transactions will be routed to your Till/Paybill.</p>
-        
-        <div className="space-y-4 max-w-lg">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">M-Pesa Business Number</label>
-            <input type="text" className="form-input w-full h-12" placeholder="Paybill or Till Number (e.g. 123456)" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 ml-1">Account Component</label>
-            <input type="text" className="form-input w-full h-12" placeholder="Account Name (e.g. EVORCA)" />
-          </div>
-          <button className="clay-btn-primary px-8 h-12 text-xs font-bold w-full sm:w-auto">
-            Save Payment Settings
-          </button>
-        </div>
-      </div>
-
-      <div className="clay-card p-8 space-y-4">
-        <p className="font-headline font-bold text-primary text-xl mb-2">Advanced Controls</p>
-        <div className="space-y-3">
-          {[
-            { label: 'Public Visibility', desc: event.is_public ? 'Event is currently public' : 'Event is currently private' },
-            { label: 'Registration Mode', desc: 'Auto-approve RSVPs or require manual review' },
-            { label: 'WhatsApp Reminders', desc: 'Send automated reminders 24h prior' }
-          ].map((item) => (
-            <div key={item.label} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-[1.5rem] bg-surface-container-low border border-outline-variant/10">
-              <div>
-                <p className="text-sm font-bold font-headline text-primary">{item.label}</p>
-                <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-1">{item.desc}</p>
-              </div>
-              <button className="btn-prestige-secondary px-4 py-2 text-xs mt-3 sm:mt-0">Configure</button>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   )

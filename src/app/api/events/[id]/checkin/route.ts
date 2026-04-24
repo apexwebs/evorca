@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { PostgrestError } from '@supabase/supabase-js'
 import { createServiceRoleClient, createClient } from '@/lib/supabase/server'
+import jwt from 'jsonwebtoken'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'evorca-prestige-staff-secret-2024'
 
 /**
  * SECURITY WARNING: 
@@ -28,27 +31,44 @@ export async function POST(
     const authClient = await createClient()
     const serviceClient = createServiceRoleClient()
     
-    if (!authClient || !serviceClient) {
+    if (!serviceClient) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 })
     }
 
-    const { data: { user }, error: userError } = await authClient.auth.getUser()
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    // RBAC Check: Is this an Organizer or Staff?
+    let isAuthorized = false
+    const authHeader = request.headers.get('Authorization')
+
+    // 1. Check for Staff JWT
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.substring(7)
+        const decoded = jwt.verify(token, JWT_SECRET) as any
+        if (decoded.role === 'staff' && decoded.eventId === eventId) {
+          isAuthorized = true
+        }
+      } catch (err) {
+        console.warn('Invalid staff token attempt')
+      }
     }
 
-    // Security Check: Does the user own this event?
-    const { data: event, error: eventError } = await authClient
-      .from('events')
-      .select('id, created_by')
-      .eq('id', eventId)
-      .single()
-
-    if (eventError || !event) {
-      return NextResponse.json({ error: 'Event not found or access denied' }, { status: 404 })
+    // 2. Check for Organizer Auth (if not already authorized as staff)
+    if (!isAuthorized && authClient) {
+      const { data: { user }, error: userError } = await authClient.auth.getUser()
+      if (user && !userError) {
+        const { data: event } = await authClient
+          .from('events')
+          .select('id, created_by')
+          .eq('id', eventId)
+          .single()
+        
+        if (event && event.created_by === user.id) {
+          isAuthorized = true
+        }
+      }
     }
 
-    if (event.created_by !== user.id) {
+    if (!isAuthorized) {
       return NextResponse.json({ error: 'You are not authorized to check in guests for this event' }, { status: 403 })
     }
 

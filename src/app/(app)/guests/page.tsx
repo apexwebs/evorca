@@ -175,7 +175,7 @@ export default function GuestsPage() {
               <div key={guest.id} className="p-5 sm:p-6 rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest transition-all hover:border-primary/20 hover:shadow-md">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary ml-2">Full Name</label>
+                    <label className="text-[9px] font-headline font-bold uppercase tracking-[0.2em] text-primary ml-2">Full Name</label>
                     <input
                       type="text"
                       className="clay-input w-full text-sm font-sans"
@@ -188,7 +188,7 @@ export default function GuestsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary ml-2">Phone</label>
+                    <label className="text-[9px] font-headline font-bold uppercase tracking-[0.2em] text-primary ml-2">Phone</label>
                     <input
                       type="tel"
                       className="clay-input w-full text-sm font-mono tracking-widest"
@@ -201,7 +201,7 @@ export default function GuestsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary ml-2">Clearance Status</label>
+                    <label className="text-[9px] font-headline font-bold uppercase tracking-[0.2em] text-primary ml-2">Clearance Status</label>
                     <select
                       className="clay-input w-full text-sm font-bold uppercase tracking-widest"
                       value={guest.status}

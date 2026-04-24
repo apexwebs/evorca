@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { deriveTicketCode, normalizePhone } from '@/lib/ticketCode'
+import { sendSMS } from '@/lib/sms'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -239,23 +240,30 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return insertResult.data
     }
 
-    const processedGuests: unknown[] = []
+    const processedGuests: any[] = []
     for (const entry of guestEntries) {
       const fullName = `${entry?.full_name || ''}`
       const phone = `${entry?.phone || ''}`
-      processedGuests.push(await upsertOneGuest(fullName, phone))
+      const guest = await upsertOneGuest(fullName, phone)
+      processedGuests.push(guest)
+
+      // Send SMS invitation if phone is provided
+      if (phone) {
+        const message = `Greetings ${fullName},\n\nYou are cordially invited to ${event.title}.\n\nView details & register here: ${request.nextUrl.origin}/events/${eventId}?ticket=${guest.ticket_code}`
+        sendSMS(phone, message).catch(err => console.error('Delayed SMS error:', err))
+      }
     }
 
     if (processedGuests.length === 1) {
       return NextResponse.json({
         guest: processedGuests[0],
-        message: 'Guest added successfully',
+        message: 'Guest added and invitation sent successfully',
       })
     }
 
     return NextResponse.json({
       guests: processedGuests,
-      message: `${processedGuests.length} guests added successfully`,
+      message: `${processedGuests.length} guests added and invitations queued`,
     })
   } catch (err) {
     console.error('Guests POST error:', err)

@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
   // Auth Guard: Protect all app routes that require authentication
   const isProtectedRoute =
     request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/events') ||
+    (request.nextUrl.pathname.startsWith('/events') && !request.nextUrl.pathname.match(/^\/events\/[^\/]+(\/register)?$/)) ||
     request.nextUrl.pathname.startsWith('/guests') ||
     request.nextUrl.pathname.startsWith('/tools')
 

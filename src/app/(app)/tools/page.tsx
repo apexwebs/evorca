@@ -19,8 +19,10 @@ import {
   ChevronRight,
   LogOut,
   LogIn,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { toast } from 'react-hot-toast'
 
 export default function ToolsPage() {
   const searchParams = useSearchParams()
@@ -28,6 +30,36 @@ export default function ToolsPage() {
   const initialTab: 'ai' | 'insights' | 'account' | 'support' =
     queryTab === 'insights' || queryTab === 'account' || queryTab === 'support' ? queryTab : 'ai'
   const [activeTab, setActiveTab] = useState<'ai' | 'insights' | 'account' | 'support'>(initialTab)
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [curationResult, setCurationResult] = useState<any>(null)
+  const [isCurating, setIsCurating] = useState(false)
+
+  const handleCurate = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error('Please describe your event first')
+      return
+    }
+
+    setIsCurating(true)
+    setCurationResult(null)
+    try {
+      const res = await fetch('/api/ai/curate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiPrompt })
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.details || data.error || 'Curation failed')
+
+      setCurationResult(data.result)
+      toast.success('Event curated with intelligence!')
+    } catch (err) {
+      toast.error((err as Error).message)
+    } finally {
+      setIsCurating(false)
+    }
+  }
   const router = useRouter()
   const { user, signOut } = useAuth()
   const [authActionLoading, setAuthActionLoading] = useState(false)
@@ -131,17 +163,98 @@ export default function ToolsPage() {
       {activeTab === 'ai' && (
         <section className="grid grid-cols-1 xl:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="xl:col-span-8 space-y-6">
-            <div className="relative overflow-hidden clay-card p-8 sm:p-10 rounded-[2rem]">
+            <div className="relative overflow-hidden clay-card p-8 sm:p-10 rounded-[2rem] bg-gradient-to-br from-primary/5 to-secondary/5">
               <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
                 <Brain className="w-32 h-32 text-primary" />
               </div>
-              <div className="relative z-10 w-full max-w-2xl">
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-secondary mb-3 font-headline">AI Creative Workspace</p>
-                <h2 className="font-headline text-2xl sm:text-4xl font-extrabold text-primary mb-4 leading-tight tracking-tight">Curate faster with assisted content lanes</h2>
-                <p className="text-on-surface-variant leading-relaxed text-sm sm:text-base">
-                  Build editorial descriptions, social promotion copy, and guest communication scripts from one place.
-                  Designed for your premium event voice.
-                </p>
+              <div className="relative z-10 w-full">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-secondary mb-3 font-headline">AI Command Center</p>
+                <div className="space-y-4 max-w-3xl">
+                  <textarea 
+                    className="clay-input w-full min-h-[120px] text-sm bg-white/50" 
+                    placeholder="Describe your event atmosphere, purpose, and audience (e.g., 'A high-end gala for Nairobi tech innovators at a rooftop lounge, jazz music, black tie...')"
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    disabled={isCurating}
+                  />
+                  <div className="flex flex-wrap gap-3">
+                    <button 
+                      onClick={handleCurate}
+                      disabled={isCurating}
+                      className="clay-btn-primary flex items-center gap-2 text-[10px] h-12"
+                    >
+                      {isCurating ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : <Sparkles className="w-4 h-4" />}
+                      Generate Full Curation
+                    </button>
+                    <button className="clay-btn-secondary flex items-center gap-2 text-[10px] h-12 opacity-50 cursor-not-allowed">
+                      <ImageIcon className="w-4 h-4" />
+                      Draft Creative Poster (Coming Soon)
+                    </button>
+                  </div>
+                </div>
+
+                {curationResult && (
+                  <div className="mt-10 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="p-8 rounded-[2rem] bg-white border border-primary/10 shadow-xl space-y-6">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-primary">AI Draft Ready</p>
+                          <h3 className="font-headline text-2xl font-extrabold text-primary">{curationResult.title}</h3>
+                        </div>
+                        <button 
+                          onClick={() => setCurationResult(null)}
+                          className="text-on-surface-variant hover:text-error"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <p className="text-sm text-on-surface-variant leading-relaxed italic">
+                            "{curationResult.description}"
+                          </p>
+                          <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-primary">
+                            <span className="bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
+                              {curationResult.currency} {curationResult.suggested_price}
+                            </span>
+                            <span className="bg-secondary/5 px-3 py-1 rounded-full border border-secondary/10">
+                              {curationResult.dress_code}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-inner">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70 mb-2">Suggested Tiers</p>
+                          <div className="flex flex-wrap gap-2">
+                            {curationResult.tiers?.map((tier: string) => (
+                              <span key={tier} className="px-3 py-1.5 bg-white rounded-lg text-[10px] font-bold border border-outline-variant/10 shadow-sm">
+                                {tier}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 flex gap-3">
+                        <button 
+                          onClick={() => {
+                            localStorage.setItem('evorca_ai_draft', JSON.stringify(curationResult))
+                            router.push('/dashboard/events/create')
+                          }}
+                          className="clay-btn-primary flex-1 h-12 text-[10px]"
+                        >
+                          Apply to New Event
+                        </button>
+                        <button className="clay-btn-secondary h-12 px-6">
+                          Refine Logic
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -179,10 +292,15 @@ export default function ToolsPage() {
                 ))}
               </div>
             </div>
-            <div className="clay-card p-8 rounded-[2rem] bg-primary text-white border-0 shadow-lg">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-2 font-headline">Pipeline Status</p>
-              <p className="font-headline font-extrabold text-2xl tracking-tight text-white mb-2">Internal Beta</p>
-              <p className="text-xs text-white/80 leading-relaxed max-w-[250px]">UI architecture complete. LangChain logic integration intentionally paused until Phase 3.</p>
+            <div className="clay-card p-8 rounded-[2rem] bg-primary text-white border-0 shadow-lg overflow-hidden relative group">
+              <div className="absolute inset-0 bg-secondary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+              <div className="relative z-10">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-2 font-headline">Intelligence Status</p>
+                <p className="font-headline font-extrabold text-2xl tracking-tight text-white mb-2">Ready for Keys</p>
+                <p className="text-xs text-white/80 leading-relaxed">
+                  The architecture is primed. Once the Gemini or OpenRouter keys are established in your environment, the Studio will activate its full reasoning capabilities.
+                </p>
+              </div>
             </div>
           </aside>
         </section>

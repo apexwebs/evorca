@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MapPin, Sparkles, ChevronRight, ChevronLeft, Check, Ticket, Image as ImageIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { toast } from 'react-hot-toast'
 
 const steps = [
   { id: 1, label: 'Details', icon: Sparkles },
@@ -43,10 +44,32 @@ export default function CreateEvent() {
     isPublic: false,
   })
 
+  // Handle AI Draft Pre-fill
+  useEffect(() => {
+    const draft = localStorage.getItem('evorca_ai_draft')
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft)
+        setFormData(prev => ({
+          ...prev,
+          name: parsed.title || prev.name,
+          description: parsed.description || prev.description,
+          dressCode: parsed.dress_code || prev.dressCode,
+          ticketPrice: parsed.suggested_price?.toString() || prev.ticketPrice,
+          currency: parsed.currency || prev.currency,
+        }))
+        toast.success('AI curation applied to your draft!')
+        localStorage.removeItem('evorca_ai_draft')
+      } catch (err) {
+        console.error('Failed to parse AI draft:', err)
+      }
+    }
+  }, [])
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const fieldClass = 'w-full rounded-xl border border-outline-variant/20 bg-surface-container-lowest px-3 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary'
-  const fieldLabelClass = 'text-[10px] font-bold uppercase tracking-[0.14em] text-primary mb-1.5'
+  const fieldClass = 'clay-input'
+  const fieldLabelClass = 'text-[10px] font-headline font-bold uppercase tracking-[0.14em] text-primary mb-1.5'
 
   const updateFormData = (field: string, value: string | boolean | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
